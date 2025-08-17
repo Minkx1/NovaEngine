@@ -1,0 +1,2 @@
+ground.draw()
+    player.update()

@@ -46,6 +46,6 @@ while run:
 * Ui-elements system (buttons, input fields).
 * Ability to work with timers and events.
 
-## 📝 License
+## License
 
 This library is free to use.
