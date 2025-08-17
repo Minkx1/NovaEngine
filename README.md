@@ -1,4 +1,4 @@
-# PyGameEngine
+# PyGameEngine V1.3.0
 
 **PyGameEngine** — is a small library, that simplifies creating games using [Pygame](https://www.pygame.org/).  
 
