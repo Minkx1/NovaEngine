@@ -1,2 +1,1 @@
-ground.draw()
-    player.update()
+print(Engine.scene_solids)

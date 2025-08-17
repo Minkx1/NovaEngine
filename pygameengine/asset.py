@@ -18,11 +18,12 @@ class Asset():
         self.img = pygame.transform.scale(self.img, (Width, Height))
         self.rect = self.img.get_rect()
 
+        if self.engine.active_scene is not None:
+            self.engine.scene_objects[self.engine.active_scene].append(self)
+            if self.solid:
+                self.engine.scene_solids[self.engine.active_scene].append(self)
+
         
-        if self.solid and self.engine:
-            if not hasattr(self.engine, "solid_assets"):
-                self.engine.solid_assets = []
-            self.engine.solid_assets.append(self)
     
     def draw(self):
         self.surface.blit(self.img, self.rect)

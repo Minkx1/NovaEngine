@@ -1,9 +1,10 @@
 """    ===== engine.py =====    """
 import pygame
+from contextlib import contextmanager
 
 pygame.init()
 
-PYGAMEENGINE_VERSION = "V1.2"
+PYGAMEENGINE_VERSION = "V1.3"
 APP_NAME_ENGINE_TAMPLATE = f" | Running with PyGameEngine {PYGAMEENGINE_VERSION}"
 
 class PyGameEngine():
@@ -20,8 +21,11 @@ class PyGameEngine():
         self.m_clck = False
         self.fps = fps
 
-        self.solid_assets = []
-    
+        self.scenes = {}
+        self.scene_solids = {}
+        self.scene_objects = {}
+        self.active_scene = None
+
     def run(self):
         self.keys_pressed = pygame.key.get_pressed()
         
@@ -33,7 +37,38 @@ class PyGameEngine():
                 return False
         
         return True
-        
+    
+    def scene(self, name):
+        def scene_func(func):
+            self.scenes[name] = func
+            if name not in self.scene_solids:
+                self.scene_solids[name] = []
+            return func
+        return scene_func
+    
+    @contextmanager
+    def assets(self, scene_name):
+        prev_scene = self.active_scene
+        self.active_scene = scene_name
+
+        if scene_name not in self.scene_solids:
+            self.scene_solids[scene_name] = []
+        if scene_name not in self.scene_objects:  
+            self.scene_objects[scene_name] = []
+
+        try:
+            yield
+        finally:
+            self.active_scene = prev_scene
+
+    def run_scene(self, name):
+        if name in self.scenes:
+            self.scenes[name]()
+            self.active_scene = name
+        else:
+            print(f"Scene '{name}' not found!")
+    
+    
 
     def RenderText(self, Text, x, y,Font="TimesNewRoman", FontSize=14, color=(0,0,0)):
         font = pygame.font.SysFont(Font, FontSize)

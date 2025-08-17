@@ -5,17 +5,18 @@ from .asset import Asset
 class Player(Asset):
     def __init__(self, engine, img_path, x, y, width=None, height=None, movement_type="platformer"):
         super().__init__(engine, img_path, width, height)
-        self.engine = engine  
-        self.solid_assets = engine.solid_assets
         self.set_position(x, y)
+
+        # рух
         self.vel_x = 0
         self.vel_y = 0
         self.speed = 5
-        self.movement_type = movement_type.lower()
         self.gravity = 0.8
         self.jump_force = -12
         self.on_ground = False
 
+        self.movement_type = movement_type.lower()
+        
     def update(self):
         keys = self.engine.keys_pressed  # беремо ключі прямо з Engine
         if self.movement_type == "platformer":
@@ -25,6 +26,12 @@ class Player(Asset):
         
         self._stay_in_bounds()
         self.draw()
+
+    @property
+    def solid_assets(self):
+        if self.engine.active_scene is None:
+            return []
+        return self.engine.scene_solids.get(self.engine.active_scene, [])
 
     def _platformer_update(self, keys):
         # Walking right-left
