@@ -3,12 +3,12 @@ import pygame
 
 pygame.init()
 
-PYGAMEENGINE_VERSION = "V1.0"
+PYGAMEENGINE_VERSION = "V1.1"
 APP_NAME_ENGINE_TAMPLATE = f" | Running with PyGameEngine {PYGAMEENGINE_VERSION}"
 
 class PyGameEngine():
 
-    def init(self, window_size = (500, 500), app_name = "Application", icon_path = None):
+    def init(self, window_size = (500, 500), app_name = "Game", icon_path = None):
         self.screen = pygame.display.set_mode(window_size)
 
         pygame.display.set_caption(app_name + PYGAMEENGINE_VERSION)
