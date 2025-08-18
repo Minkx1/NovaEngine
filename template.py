@@ -7,7 +7,7 @@ import PyGameEngine as pge
 Engine = pge.PyGameEngine()
 Engine.init(
     window_size=(900, 600),
-    app_name="PGE test",
+    app_name="Game",
 )
 
 """ --- 2. Create Scene, Add assets and Initialize function --- """

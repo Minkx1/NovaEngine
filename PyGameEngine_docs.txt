@@ -1,0 +1,129 @@
+PyGameEngine V1.3.0 Documentation
+=================================
+
+1. Overview
+-----------
+PyGameEngine is a lightweight Python library to simplify 2D game creation with Pygame.
+
+2. Installation
+---------------
+- git clone ...
+- Requirements: Python 3.x, pygame
+
+3. Engine
+---------
+Class: PyGameEngine
+- init(window_size, app_name, icon_path, fps)
+- main() decorator
+- run()
+- run_scene(scene)
+- MouseClicked(button=0)
+- KeyPressed(key)
+
+4. Scenes
+---------
+Class: Scene
+- __init__(engine)
+- add_sprite(list_of_sprites)
+- sprites() context manager
+- init_scene() decorator
+- update_all()
+- draw_all()
+
+5. Sprites & Player
+-------------------
+Class: Sprite
+- __init__(engine, img_path, Width=None, Height=None, solid=False)
+- draw(), set_position(x, y), place_centered(x, y), move(dx, dy), scale(W,H), rotate(angle)
+
+Class: Player(Sprite)
+- __init__(engine, img_path, x, y, width, height, movement_type)
+- update()
+
+6. Movements
+------------
+Class: PlatformerMovement(speed, gravity, jump_force)
+- update(engine, keys, solids, rect)
+
+Class: TopDownMovement(speed)
+- update(engine, keys, solids, rect)
+
+7. UI Elements
+--------------
+Class: Button(Sprite)
+- draw() -> returns True if clicked
+
+8. Utilities
+------------
+Colors: WHITE, BLACK, RED, GREEN, BLUE
+render_text(screen, text, x, y, font, size, color)
+fill_background(engine, color)
+
+9. Example Template
+-------------------
+{
+    """ ===== template.py ===== """
+
+    import PyGameEngine as pge
+
+    """ --- 1. Initialize PyGameEngine --- """
+
+    Engine = pge.PyGameEngine()
+    Engine.init(
+        window_size=(900, 600),
+        app_name="Game",
+    )
+
+    """ --- 2. Create Scene, Add assets and Initialize function --- """
+
+    Scene1 = pge.Scene(Engine)
+
+    with Scene1.sprites():
+        button = pge.Button(
+            engine=Engine,
+            x=250, y=250,
+            img_path="assets/button.png",
+            width=128, height=128
+        ).place_centered(250, 250)
+
+        ground = pge.Sprite(
+            engine=Engine,
+            img_path='assets/img.png',
+            Width=500, Height=50,
+            solid=True
+        ).place_centered(250, 485)
+
+        player = pge.Player(
+            engine=Engine,
+            img_path="assets/hero.png",
+            x=450, y=100,
+            width=50, height=75,
+            movement_type=pge.PlatformerMovement()
+        ) 
+
+    @Scene1.init_scene()
+    def scene1():
+        Engine.screen.fill(pge.Colors.WHITE)
+
+        ground.draw()
+        player.update()
+
+        if button.draw():
+            print("Button is Pressed!")
+
+    """ --- 3. Initialize Main function with all your project logics --- """
+
+    @Engine.main()
+    def main():
+        Engine.run_scene(Scene1)
+
+    Engine.run()
+
+}
+
+10. Notes
+---------
+- Solid objects are automatically tracked in Scene.solids
+- Movement types are interchangeable for Player
+- Scenes can have multiple sprites and UI elements
+
