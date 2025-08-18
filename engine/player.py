@@ -3,35 +3,36 @@ import pygame
 from .asset import Asset
 
 class Player(Asset):
-    def __init__(self, engine, img_path, x, y, width=None, height=None, movement_type="platformer"):
-        super().__init__(engine, img_path, width, height)
+    def __init__(self, engine, img_path, x, y, width=None, height=None, movement_type="platformer", speed=5, gravity=0.8, jump_force=12):
+        super().__init__(engine, img_path, width, height, solid=False)
         self.set_position(x, y)
 
         # рух
         self.vel_x = 0
         self.vel_y = 0
-        self.speed = 5
-        self.gravity = 0.8
-        self.jump_force = -12
+        self.speed = speed
+        self.gravity = gravity
+        self.jump_force = -jump_force
         self.on_ground = False
 
         self.movement_type = movement_type.lower()
+        self._movement_modes = {
+            "platformer": self._platformer_update,
+            "4dir": self._fourdir_update
+        }
         
     def update(self):
-        keys = self.engine.keys_pressed  # беремо ключі прямо з Engine
-        if self.movement_type == "platformer":
-            self._platformer_update(keys)
-        elif self.movement_type == "4dir":
-            self._fourdir_update(keys)
-        
+        keys = self.engine.keys_pressed
+        move_func = self._movement_modes.get(self.movement_type, self._platformer_update)
+        move_func(keys)
         self._stay_in_bounds()
         self.draw()
-
+        
     @property
     def solid_assets(self):
-        if self.engine.active_scene is None:
+        if self.engine.active_scene == None:
             return []
-        return self.engine.scene_solids.get(self.engine.active_scene, [])
+        return self.engine.active_scene.solids
 
     def _platformer_update(self, keys):
         # Walking right-left
@@ -50,29 +51,12 @@ class Player(Asset):
         self.vel_y += self.gravity
 
         # оновлення позиції
-        # рух по X
         self.rect.x += self.vel_x
-        for asset in getattr(self, 'solid_assets', []):
-            if asset.solid and self.rect.colliderect(asset.rect):
-                if self.vel_x > 0:
-                    self.rect.right = asset.rect.left
-                elif self.vel_x < 0:
-                    self.rect.left = asset.rect.right
-        
-        # рух по Y
+        self._check_collision(self.vel_x, 0)
+
         self.rect.y += self.vel_y
         self.on_ground = False
-        for asset in getattr(self, 'solid_assets', []):
-            if asset.solid and self.rect.colliderect(asset.rect):
-                # якщо падаємо вниз - стаємо на платформу
-                if self.vel_y > 0:
-                    self.rect.bottom = asset.rect.top
-                    self.vel_y = 0
-                    self.on_ground = True
-                # якщо стрибаємо вгору - не пролізти крізь платформу
-                elif self.vel_y < 0:
-                    self.rect.top = asset.rect.bottom
-                    self.vel_y = 0     
+        self._check_collision(0, self.vel_y)   
 
     def _fourdir_update(self, keys):
         dx, dy = 0, 0
@@ -123,3 +107,17 @@ class Player(Asset):
                 self.rect.top = 0
             if self.rect.bottom > screen_h:
                 self.rect.bottom = screen_h
+    
+    def _check_collision(self, dx, dy):
+        # print(self.solid_assets)
+        for asset in self.solid_assets:
+            if asset.solid and self.rect.colliderect(asset.rect):
+                if dx > 0: self.rect.right = asset.rect.left
+                elif dx < 0: self.rect.left = asset.rect.right
+                if dy > 0: 
+                    self.rect.bottom = asset.rect.top
+                    self.vel_y = 0
+                    self.on_ground = True
+                elif dy < 0:
+                    self.rect.top = asset.rect.bottom
+                    self.vel_y = 0
