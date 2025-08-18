@@ -1,9 +1,9 @@
 """    ===== template.py =====    """
 
 import pygame
-from .asset import Asset
+from .sprite import Sprite
 
-class Button(Asset):
+class Button(Sprite):
     last_pressed = False
     
     def __init__(self, engine, x, y, img_path,width=None, height=None):
