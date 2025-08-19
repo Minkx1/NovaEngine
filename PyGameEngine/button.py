@@ -7,7 +7,7 @@ class Button(Sprite):
     last_pressed = False
     
     def __init__(self, engine, x, y, img_path,width=None, height=None):
-        super().__init__(engine, img_path, Width=width, Height=height)
+        super().__init__(engine, img_path, width=width, height=height)
 
         self.set_position(x, y)
     

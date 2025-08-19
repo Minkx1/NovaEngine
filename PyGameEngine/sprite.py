@@ -14,21 +14,25 @@ class Sprite:
         self.engine = engine
         self.surface = self.engine.screen
         self.solid = solid
+        self.alive = True
 
         # Load original image (kept for quality when scaling/rotating)
         self.original_img = pygame.image.load(img_path).convert_alpha()
+        self.width, self.height = width, height
         if width is None:
-            width = self.original_img.get_width()
+            self.width = self.original_img.get_width()
         if height is None:
-            height = self.original_img.get_height()
+            self.height = self.original_img.get_height()
 
         # Current image (may be transformed)
-        self.img = pygame.transform.scale(self.original_img, (width, height))
+        self.img = pygame.transform.scale(self.original_img, (self.width, self.height))
+        self.original_img = self.img
         self.rect = self.img.get_rect()
 
     def draw(self):
         """Draw sprite to the screen surface."""
-        self.surface.blit(self.img, self.rect)
+        if self.alive:
+            self.surface.blit(self.img, self.rect)
         return self
 
     def set_position(self, x, y):
@@ -48,7 +52,7 @@ class Sprite:
 
     def scale(self, width, height):
         """Scale sprite to (width, height)."""
-        self.img = pygame.transform.scale(self.original_img, (width, height))
+        self.img = pygame.transform.scale(self.img, (width, height))
         # Keep sprite centered after rescaling
         self.rect = self.img.get_rect(center=self.rect.center)
         return self
@@ -57,4 +61,8 @@ class Sprite:
         """Rotate sprite around its center."""
         self.img = pygame.transform.rotate(self.original_img, angle)
         self.rect = self.img.get_rect(center=self.rect.center)
+        return self
+
+    def kill(self):
+        self.alive = False
         return self

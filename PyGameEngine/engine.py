@@ -1,6 +1,6 @@
 """ ===== engine.py ===== """
 
-import pygame
+import pygame, threading
 
 pygame.init()
 
@@ -38,13 +38,26 @@ class PyGameEngine:
         self.active_scene = None
         self.main_run_func = None
 
+        self.threads = []
+
     # ========================
     # MAIN LOOP
     # ========================
     def run(self):
-        """Run the main game loop."""
-        self.running = True
+        """Run the main game loop and threads."""
 
+        # Threads
+        for thread in self.threads:
+            def thread_loop():
+                running = True
+                while running:
+                    # Call the main game logic provided by user
+                    t = threading.Thread(target=thread,daemon=True)
+                    t.start()
+            thread_loop()
+
+        # Main Game Loop
+        self.running = True
         while self.running:
             self.keys_pressed = pygame.key.get_pressed()
 
@@ -60,11 +73,26 @@ class PyGameEngine:
             # Update display and regulate FPS
             pygame.display.flip()
             self.clock.tick(self.fps)
+    
+    def run_active_scene(self):
+        if self.active_scene:
+            scene = self.active_scene
+            scene.run()
+    
+    def set_active_scene(self, Scene):
+        self.active_scene = Scene
 
     def main(self):
         """Decorator to register the main game function."""
         def decorator(func):
             self.main_run_func = func
+            return func
+        return decorator
+
+    def thread(self):
+        """Decorator to register threads."""
+        def decorator(func):
+            self.threads.append(func)
             return func
         return decorator
 
