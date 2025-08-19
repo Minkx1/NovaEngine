@@ -52,9 +52,8 @@ class PyGameEngine:
                 running = True
                 while running:
                     # Call the main game logic provided by user
-                    t = threading.Thread(target=thread,daemon=True)
-                    t.start()
-            thread_loop()
+                    thread()
+            threading.Thread(target=thread_loop(), daemon=True).start()
 
         # Main Game Loop
         self.running = True
@@ -73,6 +72,9 @@ class PyGameEngine:
             # Update display and regulate FPS
             pygame.display.flip()
             self.clock.tick(self.fps)
+    
+    def kill(self):
+        self.running = False
     
     def run_active_scene(self):
         if self.active_scene:

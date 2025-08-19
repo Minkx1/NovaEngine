@@ -1,6 +1,6 @@
 """ ===== template.py ===== """
 
-import pygame, math
+import pygame, math, threading, sys
 import PyGameEngine as pge
 
 from bullet import Bullet
@@ -73,5 +73,18 @@ Engine.set_active_scene(Menu)
 @Engine.main()
 def main():
     Engine.run_active_scene()
+
+def cmd_input():
+    while True:
+        cmd = input(">>> ")
+        if cmd == "kill()":
+            Engine.kill()
+            break
+        try:
+            eval(cmd)
+        except Exception as e:
+            print("Error:", e)
+
+threading.Thread(target=cmd_input).start()
 
 Engine.run()
