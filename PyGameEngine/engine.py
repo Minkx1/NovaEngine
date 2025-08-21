@@ -1,6 +1,6 @@
 """ ===== engine.py ===== """
 
-import pygame, threading
+import pygame, threading,sys
 
 pygame.init()
 
@@ -72,6 +72,8 @@ class PyGameEngine:
             # Update display and regulate FPS
             pygame.display.flip()
             self.clock.tick(self.fps)
+        
+        sys.exit()
     
     def kill(self):
         self.running = False

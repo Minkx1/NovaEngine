@@ -1,6 +1,6 @@
 """ ===== sprite.py ===== """
 
-import pygame
+import pygame,threading,time
 
 class Sprite:
     """
@@ -29,11 +29,19 @@ class Sprite:
         self.original_img = self.img
         self.rect = self.img.get_rect()
 
+        self.x = self.rect.x
+        self.y = self.rect.y
+
     def draw(self):
         """Draw sprite to the screen surface."""
         if self.alive:
             self.surface.blit(self.img, self.rect)
         return self
+    
+    def set_update(self,func):
+        """Set logic of self.update method."""
+        self.update = func.__get__(self, self.__class__)
+        return func
 
     def set_position(self, x, y):
         """Set top-left position of the sprite."""
@@ -63,6 +71,93 @@ class Sprite:
         self.rect = self.img.get_rect(center=self.rect.center)
         return self
 
+    def collide(self, Sprite):
+        res = False
+        if self.rect.colliderect(Sprite.rect): res = True
+        return res 
+
+    def rect_update(self):
+        self.rect = self.img.get_rect()
+
+        self.x = self.rect.x
+        self.y = self.rect.y
+        return self.rect
+
     def kill(self):
         self.alive = False
         return self
+    
+    def update(self):
+        return self.draw()
+
+
+class Group:
+    """
+    Container for managing multiple Sprite objects.
+    Provides batch operations like draw, update, add, remove, collisions.
+    """
+
+    def __init__(self, *sprites):
+        self.sprites = list(sprites)
+
+    def add(self, *sprites):
+        """Add one or more sprites to the group."""
+        for sprite in sprites:
+            if sprite not in self.sprites:
+                self.sprites.append(sprite)
+        return self
+
+    def remove(self, *sprites):
+        """Remove one or more sprites from the group."""
+        for sprite in sprites:
+            if sprite in self.sprites:
+                self.sprites.remove(sprite)
+        return self
+
+    def draw(self):
+        """Draw all alive sprites in the group."""
+        for sprite in self.sprites:
+            sprite.draw()
+        return self
+
+    def move(self, dx=0, dy=0):
+        """Move all sprites in the group."""
+        for sprite in self.sprites:
+            sprite.move(dx, dy)
+        return self
+
+    def scale(self, width, height):
+        """Scale all sprites in the group."""
+        for sprite in self.sprites:
+            sprite.scale(width, height)
+        return self
+
+    def rotate(self, angle):
+        """Rotate all sprites in the group."""
+        for sprite in self.sprites:
+            sprite.rotate(angle)
+        return self
+
+    def kill(self):
+        """Kill all sprites in the group."""
+        for sprite in self.sprites:
+            sprite.kill()
+        return self
+
+    def __iter__(self):
+        """Iterate over sprites."""
+        return iter(self.sprites)
+
+    def __len__(self):
+        return len(self.sprites)
+
+    def __getitem__(self, idx):
+        return self.sprites[idx]
+
+    def collide(self, sprite):
+        """Return list of sprites colliding with given sprite."""
+        l = []
+        for s in self.sprites:
+            if s.collide(sprite):
+                l.append(s)
+        return l

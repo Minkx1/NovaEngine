@@ -1,6 +1,6 @@
 """    ===== utils.py =====    """
 
-import pygame
+import pygame, threading
 from enum import Enum
 from typing import Tuple, Union
 
@@ -70,3 +70,9 @@ def fill_background(
         if isinstance(color, Colors):
             color = color.value
         screen.fill(color)
+
+def thread():
+    def decorator(func):
+        threading.Thread(target=func, daemon=True).start()
+        return func
+    return decorator

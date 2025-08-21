@@ -3,7 +3,6 @@
 from contextlib import contextmanager
 from .sprite import Sprite
 from .button import Button
-from .player import Player
 
 
 class Scene:
@@ -46,8 +45,7 @@ class Scene:
         Context manager to auto-register newly created sprites.
         Usage:
             with scene.sprites():
-                player = Player(...)
-                button = Button(...)
+                sprite1 = Sprite(...)
         """
         # Inspect local variables before 'with'
         import inspect
@@ -62,7 +60,7 @@ class Scene:
 
         for name in new_vars:
             obj = after_vars[name]
-            if isinstance(obj, (Button, Sprite, Player)):
+            if isinstance(obj, (Button, Sprite)):
                 self.objects.append(obj)
                 if getattr(obj, "solid", False):
                     self.solids.append(obj)
@@ -78,3 +76,7 @@ class Scene:
             self.run = func
             return func
         return decorator
+    
+    def update(self):
+        for sprite in self.objects:
+            sprite.update()
