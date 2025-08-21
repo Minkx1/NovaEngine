@@ -16,7 +16,7 @@ class Bullet(Sprite):
 
         self.mouse_pos = pygame.mouse.get_pos()
         dx, dy = self.mouse_pos[0] - x, self.mouse_pos[1] - y
-        dist = math.hypot(dx, dy)  # довжина вектора
+        dist = math.hypot(dx, dy)
         if dist == 0: dist = 1
 
         self.vel_x = dx / dist * speed

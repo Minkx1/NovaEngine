@@ -1,6 +1,6 @@
-# PyGameEngine V1.4.0
+# PyGameEngine V1.5.0
 
-**PyGameEngine** — a lightweight Python library that simplifies creating 2D games using [Pygame](https://www.pygame.org/).
+**PyGameEngine** — a lightweight Python Framework that simplifies creating 2D games using [Pygame](https://www.pygame.org/).
 It provides an engine, scene management, sprite handling, movement systems, and basic UI elements.
 
 ## How to Start
@@ -10,96 +10,75 @@ It provides an engine, scene management, sprite handling, movement systems, and 
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourname/PyGameEngine.git
+git clone https://github.com/Minkx1/PyGameEngine.git
 ```
 
 ### Usage Template
 
 ```python
-# template.py
-import pygameengine as pge
+""" ===== template.py ===== """
 
-# 1. Create Engine
-Engine = pge.PyGameEngine()
+import pygame, math
+import PyGameEngine as pge
 
-# 2. Initialize Engine (window size, title, optional icon)
-Engine.init(
-    window_size=(900, 600),
-    app_name="My Game",
-    icon_path="assets/icon.png"
-)
+""" --- 1. Initialize PyGameEngine --- """
 
-# 3. Create a Scene
+# variables and others
+SCREEN_W, SCREEN_H = 900, 600 
+
+Engine = pge.PyGameEngine().init(window_size=(SCREEN_W, SCREEN_H))
+
+""" --- 2. Create Scene, Add assets and Initialize function --- """
+
+# Scene1
 Scene1 = pge.Scene(Engine)
 
 with Scene1.sprites():
-    player = pge.Player(
-        engine=Engine,
-        img_path="assets/hero.png",
-        x=450, y=100,
-        width=50, height=75,
-        movement_type=pge.PlatformerMovement()
-    )
-    
-    ground = pge.Sprite(
-        engine=Engine,
-        img_path="assets/ground.png",
-        Width=500, Height=50,
-        solid=True
-    ).place_centered(250, 485)
+    player = pge.Sprite(
+        engine=Engine,img_path="assets/player.png",
+        width=120, height=103
+    ).place_centered(SCREEN_W/2, SCREEN_H/2)
 
-    button = pge.Button(
-        engine=Engine,
-        img_path="assets/button.png",
-        width=128, height=128
-    ).place_centered(250, 250)
-
-# 4. Scene update logic
 @Scene1.init_scene()
 def scene1():
-    Engine.screen.fill(pge.Colors.WHITE)
-    
-    ground.draw()
-    player.update()
-    
-    if button.draw():
-        print("Button pressed!")
+    pge.fill_background(engine=Engine, color=pge.Colors.WHITE) # fill BackGround with some color or img
 
-# 5. Main loop
-@Engine.main()
-def main():
-    Engine.run_scene(Scene1)
+    # If you have objects that dont need any logic, you may just dont use set_update. Basic update() is equal to draw()
+    @player.set_update 
+    def player_update(self):
+        
+        # Your Logic Here
 
-# 6. Run the engine
-Engine.run()
+        self.draw()
+
+    Scene1.update() # SceneX.update() uses update() method on all objects of scene, be carefull
+
+""" --- 3. Initialize Main function with all your project logics --- """
+
+# you can specify your first scene with Engine.set_active_scene(*Scene)
+
+Engine.run(globals()) 
+# globals() is for command_input. If you dont wanna use it or if it's not available, you can erase it.
+
 ```
 
 ## Features
 
 * Simple game loop (`init`, `run`) for your project.
 * Scene management: easy creation and switching between scenes.
-* Sprites and Player class with movement systems:
-
-  * **PlatformerMovement**: 2D platformer controls with gravity and jumping.
-  * **TopDownMovement**: 4-directional movement for top-down games.
+* Sprite class for all your logic:
 * UI elements such as **Button**.
 * Utilities:
 
   * `Colors` enum for predefined colors.
   * `render_text()` for quick text rendering.
   * `fill_background()` for setting background color or image.
+  * `Key_Pressed(), Key_Hold() and MouseClicked` for input handler.
+
 * Automatic registration of sprites in a scene using context manager.
 * Solid object management for collision detection.
 * Extensible architecture for events, timers, and animations.
-
-## Plans / Upcoming Features
-
-* FPS limiter and FPS display.
-* ResourceManager for easy loading of images, sounds, and fonts.
-* Enhanced animations system.
-* Input fields and more UI elements.
-* Multi-player support and custom controls.
-* Event callbacks for Player (on\_jump, on\_land, etc.) and Scene (on\_enter, on\_exit).
+* Command input for hot debugging.
 
 ## License
 

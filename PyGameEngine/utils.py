@@ -1,9 +1,12 @@
 """    ===== utils.py =====    """
 
-import pygame, threading
+import pygame, threading,time
 from enum import Enum
 from typing import Tuple, Union
 
+m_clck = False
+keys_pressed = []
+key_single_state = {}
 
 class Colors(Enum):
     WHITE = (255, 255, 255)
@@ -71,8 +74,73 @@ def fill_background(
             color = color.value
         screen.fill(color)
 
-def thread():
+def thread(*args):
     def decorator(func):
-        threading.Thread(target=func, daemon=True).start()
+        threading.Thread(target=func(*args), daemon=True).start()
         return func
     return decorator
+
+def wait(miliseconds: float):
+    """
+    Delay in miliseconds
+    """
+    time.sleep(miliseconds/1000)
+
+def MouseClicked(button=0):
+    """
+    Detects a single mouse click (not hold).
+    Returns True only when the mouse button is first pressed.
+    """
+    pressed = False
+    if not m_clck and pygame.mouse.get_pressed()[button]:
+        m_clck = True
+        pressed = True
+    if not pygame.mouse.get_pressed()[button]:
+        m_clck = False
+    return pressed
+
+def KeyPressed(key):
+    """
+    Check if a specific key is currently pressed.
+
+    Args:
+        key (int): pygame key constant, e.g. pygame.K_w
+
+    Returns:
+        bool: True if the key is pressed, False otherwise
+    """
+
+    try:
+        pressed = bool(keys_pressed[key])
+    except (IndexError, TypeError):
+        return False
+
+    if pressed:
+        if not key_single_state.get(key, False):
+            # вперше натиснули
+            key_single_state[key] = True
+            return True
+        else:
+            # утримується
+            return False
+    else:
+        # клавіша відпущена
+        key_single_state[key] = False
+        return False
+
+def KeyHold(key):
+    """
+    Check if a specific key is currently hold.
+
+    Args:
+        key (int): pygame key constant, e.g. pygame.K_w
+
+    Returns:
+        bool: True if the key is hold, False otherwise
+    """
+    try:
+        pressed = bool(keys_pressed[key])
+    except (IndexError, TypeError):
+        return False
+    
+    return pressed

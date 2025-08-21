@@ -78,5 +78,5 @@ class Scene:
         return decorator
     
     def update(self):
-        for sprite in self.objects:
-            sprite.update()
+        for s in self.objects:
+            s.update()

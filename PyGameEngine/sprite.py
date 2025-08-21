@@ -67,7 +67,7 @@ class Sprite:
 
     def rotate(self, angle):
         """Rotate sprite around its center."""
-        self.img = pygame.transform.rotate(self.original_img, angle)
+        self.img = pygame.transform.rotate(self.original_img, -angle)
         self.rect = self.img.get_rect(center=self.rect.center)
         return self
 

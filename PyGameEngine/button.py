@@ -9,8 +9,10 @@ class Button(Sprite):
     def __init__(self, engine, img_path,width=None, height=None):
         super().__init__(engine, img_path, width=width, height=height)
     
-    def draw(self):
+    def check(self):
         """Draws button and returns True if pressed"""
+        self.draw()
+
         mouse_pos = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()[0]  # ліва кнопка
 

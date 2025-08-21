@@ -1,13 +1,13 @@
 """ ===== engine.py ===== """
 
-import pygame, threading,sys
+import pygame, threading,sys,subprocess
 
 pygame.init()
 
 # ========================
 # ENGINE CONSTANTS
 # ========================
-PYGAMEENGINE_VERSION = "V1.4.0"
+PYGAMEENGINE_VERSION = "V1.5.0"
 APP_NAME_ENGINE_TEMPLATE = f" | Running with PyGameEngine {PYGAMEENGINE_VERSION}"
 
 
@@ -36,15 +36,20 @@ class PyGameEngine:
 
         self.scenes = []
         self.active_scene = None
-        self.main_run_func = None
+            
+        self.main_run_func = self.run_active_scene
 
         self.threads = []
+        self.cmd_allow = True
+
+        return self
 
     # ========================
     # MAIN LOOP
     # ========================
-    def run(self):
+    def run(self, main_globals=None):
         """Run the main game loop and threads."""
+        self.console_vars = main_globals if main_globals else {}
 
         # Threads
         for thread in self.threads:
@@ -53,9 +58,26 @@ class PyGameEngine:
                 while running:
                     # Call the main game logic provided by user
                     thread()
-            threading.Thread(target=thread_loop(), daemon=True).start()
+            threading.Thread(target=thread_loop, daemon=True).start()
 
         # Main Game Loop
+        if self.cmd_allow:
+            def run_cmd_input():
+                while True:
+                    cmd = input(">>> ")
+                    if cmd == "kill()":
+                        self.kill()
+                        break
+                    elif cmd == "restart()":
+                        subprocess.Popen([sys.executable] + sys.argv)
+                        self.kill()
+                        break
+                    try:
+                        eval(cmd, getattr(self, "console_vars", {}))
+                    except Exception as e:
+                        print("Error:", e)
+            threading.Thread(target=run_cmd_input, daemon=True).start()
+
         self.running = True
         while self.running:
             self.keys_pressed = pygame.key.get_pressed()
@@ -110,23 +132,3 @@ class PyGameEngine:
             self.active_scene = scene
         else:
             print("Scene not found!")
-
-    # ========================
-    # INPUT HELPERS
-    # ========================
-    def MouseClicked(self, button=0):
-        """
-        Detects a single mouse click (not hold).
-        Returns True only when the mouse button is first pressed.
-        """
-        pressed = False
-        if not self.m_clck and pygame.mouse.get_pressed()[button]:
-            self.m_clck = True
-            pressed = True
-        if not pygame.mouse.get_pressed()[button]:
-            self.m_clck = False
-        return pressed
-
-    def KeyPressed(self, key):
-        """Check if a specific key is currently pressed."""
-        return self.keys_pressed[key]
