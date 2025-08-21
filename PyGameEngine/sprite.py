@@ -1,6 +1,6 @@
 """ ===== sprite.py ===== """
 
-import pygame,threading,time
+import pygame
 
 class Sprite:
     """
@@ -15,6 +15,8 @@ class Sprite:
         self.surface = self.engine.screen
         self.solid = solid
         self.alive = True
+
+        self.update_func = None
 
         # Load original image (kept for quality when scaling/rotating)
         self.original_img = pygame.image.load(img_path).convert_alpha()
@@ -38,10 +40,12 @@ class Sprite:
             self.surface.blit(self.img, self.rect)
         return self
     
-    def set_update(self,func):
+    def set_update(self):
         """Set logic of self.update method."""
-        self.update = func.__get__(self, self.__class__)
-        return func
+        def decorator(func):
+            self.update_func = func
+            return func
+        return decorator
 
     def set_position(self, x, y):
         """Set top-left position of the sprite."""
@@ -88,7 +92,10 @@ class Sprite:
         return self
     
     def update(self):
-        return self.draw()
+        if not self.update_func:
+            return self.draw()
+        else: 
+            self.update_func()
 
 
 class Group:
@@ -161,3 +168,26 @@ class Group:
             if s.collide(sprite):
                 l.append(s)
         return l
+
+class Button(Sprite):
+    last_pressed = False
+    
+    def __init__(self, engine, img_path,width=None, height=None):
+        super().__init__(engine, img_path, width=width, height=height)
+    
+    def check(self):
+        """Draws button and returns True if pressed"""
+        self.draw()
+
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()[0]  # ліва кнопка
+
+        self.surface.blit(self.img, self.rect)
+
+        clicked = False
+        if self.rect.collidepoint(mouse_pos):
+            if mouse_pressed and not Button.last_pressed:
+                clicked = True
+
+        Button.last_pressed = mouse_pressed
+        return clicked

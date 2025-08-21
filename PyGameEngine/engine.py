@@ -73,7 +73,7 @@ class PyGameEngine:
                         self.kill()
                         break
                     try:
-                        eval(cmd, getattr(self, "console_vars", {}))
+                        exec(cmd, getattr(self, "console_vars", {}))
                     except Exception as e:
                         print("Error:", e)
             threading.Thread(target=run_cmd_input, daemon=True).start()

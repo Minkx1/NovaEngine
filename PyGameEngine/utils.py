@@ -17,10 +17,10 @@ class Colors(Enum):
 
 
 def render_text(
-    screen: pygame.Surface,
+    engine,
     text: str,
-    x: int,
-    y: int,
+    x: float,
+    y: float,
     font: str = "TimesNewRoman",
     size: int = 14,
     color: Union[Colors, Tuple[int, int, int]] = Colors.BLACK,
@@ -30,7 +30,7 @@ def render_text(
     Render text on the screen at (x, y).
 
     Args:
-        screen: pygame.Surface to draw on
+        engine: PyGameEngine object
         text: string to render
         x, y: coordinates
         font: font name
@@ -38,9 +38,11 @@ def render_text(
         color: text color (Colors enum or RGB tuple)
         center: if True, center the text at (x, y)
     """
+    screen = engine.screen
+    
     if isinstance(color, Colors):
         color = color.value
-
+    
     font_obj = pygame.font.SysFont(font, size)
     text_surf = font_obj.render(text, True, color)
 
@@ -87,6 +89,7 @@ def wait(miliseconds: float):
     time.sleep(miliseconds/1000)
 
 def MouseClicked(button=0):
+    global m_clck
     """
     Detects a single mouse click (not hold).
     Returns True only when the mouse button is first pressed.
@@ -100,6 +103,7 @@ def MouseClicked(button=0):
     return pressed
 
 def KeyPressed(key):
+    global keys_pressed, key_single_state
     """
     Check if a specific key is currently pressed.
 
@@ -129,6 +133,7 @@ def KeyPressed(key):
         return False
 
 def KeyHold(key):
+    global keys_pressed
     """
     Check if a specific key is currently hold.
 

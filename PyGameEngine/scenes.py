@@ -1,9 +1,7 @@
 """ ===== scenes.py ===== """
 
 from contextlib import contextmanager
-from .sprite import Sprite
-from .button import Button
-
+from .sprite import Sprite,Button
 
 class Scene:
     """
