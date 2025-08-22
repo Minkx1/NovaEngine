@@ -1,5 +1,5 @@
 import pygame, math
-from PyGameEngine import Sprite
+from SparkEngine import Sprite
 
 class Bullet(Sprite):
     def __init__(

@@ -1,17 +1,17 @@
 """ ===== main.py ===== """
 
 import pygame
-import PyGameEngine as pge
+import SparkEngine as SE
 
 """ --- 1. Initialize PyGameEngine and others --- """
 
 SCREEN_W, SCREEN_H = 900, 600 
 
-Engine = pge.PyGameEngine().init(window_size=(SCREEN_W, SCREEN_H))
+Engine = SE.SparkEngine(window_size=(SCREEN_W, SCREEN_H))
 
 """ --- 2. Create Scene, Add assets and Initialize function --- """
 
-Scene1 = pge.Scene(Engine)
+Scene1 = SE.Scene(Engine)
 
 with Scene1.sprites():
     
@@ -19,7 +19,7 @@ with Scene1.sprites():
 
 @Scene1.init_scene()
 def scene1():
-    pge.fill_background(engine=Engine, color=pge.Colors.WHITE)
+    SE.fill_background(engine=Engine, color=SE.Colors.WHITE)
 
     # <-- put here some logic
 

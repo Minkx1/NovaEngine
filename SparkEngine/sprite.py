@@ -4,7 +4,7 @@ import pygame
 
 class Sprite:
     """
-    A helper class for working with sprites:
+    Helper class for working with sprites:
     - load image
     - scaling, moving, rotating
     - drawing on the screen
@@ -18,31 +18,25 @@ class Sprite:
 
         self.update_func = None
 
-        # Load original image (kept for quality when scaling/rotating)
+        # Load original image (keep for transformations)
         self.original_img = pygame.image.load(img_path).convert_alpha()
-        self.width, self.height = width, height
-        if width is None:
-            self.width = self.original_img.get_width()
-        if height is None:
-            self.height = self.original_img.get_height()
+        self.width = width or self.original_img.get_width()
+        self.height = height or self.original_img.get_height()
 
         # Current image (may be transformed)
         self.img = pygame.transform.scale(self.original_img, (self.width, self.height))
         self.original_img = self.img
-        self.original_update = None
         self.rect = self.img.get_rect()
-
-        self.x = self.rect.x
-        self.y = self.rect.y
+        self.x, self.y = self.rect.topleft
 
     def draw(self):
         """Draw sprite to the screen surface."""
         if self.alive:
             self.surface.blit(self.img, self.rect)
         return self
-    
+
     def set_update(self):
-        """Set logic of self.update method."""
+        """Decorator to set custom update logic for the sprite."""
         def decorator(func):
             self.update_func = func
             return func
@@ -51,52 +45,56 @@ class Sprite:
     def set_position(self, x, y):
         """Set top-left position of the sprite."""
         self.rect.topleft = (x, y)
+        self.x, self.y = x, y
         return self
 
     def place_centered(self, x, y):
         """Center the sprite at the given coordinates."""
         self.rect.center = (x, y)
+        self.x, self.y = self.rect.topleft
         return self
 
     def move(self, dx=0, dy=0):
         """Move sprite by (dx, dy)."""
-        self.rect.move_ip(dx, dy)  # move in place
+        self.rect.move_ip(dx, dy)
+        self.x, self.y = self.rect.topleft
         return self
 
     def scale(self, width, height):
-        """Scale sprite to (width, height)."""
+        """Scale sprite to (width, height), keeping it centered."""
         self.img = pygame.transform.scale(self.img, (width, height))
-        # Keep sprite centered after rescaling
         self.rect = self.img.get_rect(center=self.rect.center)
+        self.x, self.y = self.rect.topleft
         return self
 
     def rotate(self, angle):
         """Rotate sprite around its center."""
         self.img = pygame.transform.rotate(self.original_img, -angle)
         self.rect = self.img.get_rect(center=self.rect.center)
+        self.x, self.y = self.rect.topleft
         return self
 
-    def collide(self, Sprite):
-        res = False
-        if self.rect.colliderect(Sprite.rect): res = True
-        return res 
+    def collide(self, other):
+        """Check collision with another sprite."""
+        return self.rect.colliderect(other.rect)
 
     def rect_update(self):
-        self.rect = self.img.get_rect()
-
-        self.x = self.rect.x
-        self.y = self.rect.y
+        """Update the rect based on the current image size."""
+        self.rect = self.img.get_rect(topleft=self.rect.topleft)
+        self.x, self.y = self.rect.topleft
         return self.rect
 
     def kill(self):
+        """Mark sprite as dead (not drawn or updated)."""
         self.alive = False
         return self
-    
+
     def update(self):
-        if not self.update_func:
-            return self.draw()
-        else: 
+        """Call custom update function or draw by default."""
+        if self.update_func:
             self.update_func()
+        else:
+            self.draw()
 
 
 class Group:
@@ -109,57 +107,48 @@ class Group:
         self.sprites = list(sprites)
 
     def add(self, *sprites):
-        """Add one or more sprites to the group."""
         for sprite in sprites:
             if sprite not in self.sprites:
                 self.sprites.append(sprite)
         return self
 
     def remove(self, *sprites):
-        """Remove one or more sprites from the group."""
         for sprite in sprites:
             if sprite in self.sprites:
                 self.sprites.remove(sprite)
         return self
 
     def draw(self):
-        """Draw all alive sprites in the group."""
         for sprite in self.sprites:
             sprite.draw()
         return self
 
     def update(self):
-        """Updates all alive sprites in the group."""
         for sprite in self.sprites:
             sprite.update()
         return self
 
     def move(self, dx=0, dy=0):
-        """Move all sprites in the group."""
         for sprite in self.sprites:
             sprite.move(dx, dy)
         return self
 
     def scale(self, width, height):
-        """Scale all sprites in the group."""
         for sprite in self.sprites:
             sprite.scale(width, height)
         return self
 
     def rotate(self, angle):
-        """Rotate all sprites in the group."""
         for sprite in self.sprites:
             sprite.rotate(angle)
         return self
 
     def kill(self):
-        """Kill all sprites in the group."""
         for sprite in self.sprites:
             sprite.kill()
         return self
 
     def __iter__(self):
-        """Iterate over sprites."""
         return iter(self.sprites)
 
     def __len__(self):
@@ -170,31 +159,21 @@ class Group:
 
     def collide(self, sprite):
         """Return list of sprites colliding with given sprite."""
-        l = []
-        for s in self.sprites:
-            if s.collide(sprite):
-                l.append(s)
-        return l
+        return [s for s in self.sprites if s.collide(sprite)]
+
 
 class Button(Sprite):
     last_pressed = False
-    
-    def __init__(self, engine, img_path,width=None, height=None):
+
+    def __init__(self, engine, img_path, width=None, height=None):
         super().__init__(engine, img_path, width=width, height=height)
-    
+
     def check(self):
-        """Draws button and returns True if pressed"""
+        """Draw button and return True if it was just pressed."""
         self.draw()
-
         mouse_pos = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()[0]  # ліва кнопка
+        mouse_pressed = pygame.mouse.get_pressed()[0]
 
-        self.surface.blit(self.img, self.rect)
-
-        clicked = False
-        if self.rect.collidepoint(mouse_pos):
-            if mouse_pressed and not Button.last_pressed:
-                clicked = True
-
+        clicked = mouse_pressed and self.rect.collidepoint(mouse_pos) and not Button.last_pressed
         Button.last_pressed = mouse_pressed
         return clicked
