@@ -1,5 +1,4 @@
-from .engine import PyGameEngine
+from .engine import PyGameEngine, Colors
 from .sprite import Sprite, Group, Button
 from .scenes import Scene
-from .utils import *
 from .movements import *

@@ -21,11 +21,16 @@ class Bullet(Sprite):
 
         self.vel_x = dx / dist * speed
         self.vel_y = dy / dist * speed
+    
+    def move(self, dx, dy):
+        super().move(dx, dy)
+        self.x,self.y = self.rect.x, self.rect.y
 
     def update(self):
         if self.alive:
             self.draw()
             self.move(self.vel_x, self.vel_y)
-            if self.x < 0 or self.x > self.engine.screen.get_width():
-                if self.y < 0 or self.y > self.engine.screen.get_height():
-                    self.kill()
+            
+            if (self.x + self.width < 0 or self.x > self.engine.screen.get_width()
+                or self.y + self.height < 0 or self.y > self.engine.screen.get_height()):
+                self.kill()

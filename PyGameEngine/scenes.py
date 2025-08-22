@@ -1,7 +1,7 @@
 """ ===== scenes.py ===== """
 
 from contextlib import contextmanager
-from .sprite import Sprite,Button
+from .sprite import Sprite,Group,Button
 
 class Scene:
     """
@@ -38,9 +38,9 @@ class Scene:
                 self.solids.append(obj)
 
     @contextmanager
-    def sprites(self):
+    def init(self):
         """
-        Context manager to auto-register newly created sprites.
+        Context manager to auto-register newly created sprites and init scene objects.
         Usage:
             with scene.sprites():
                 sprite1 = Sprite(...)
@@ -58,7 +58,7 @@ class Scene:
 
         for name in new_vars:
             obj = after_vars[name]
-            if isinstance(obj, (Button, Sprite)):
+            if isinstance(obj, (Button, Sprite, Group)):
                 self.objects.append(obj)
                 if getattr(obj, "solid", False):
                     self.solids.append(obj)
@@ -66,7 +66,7 @@ class Scene:
     # ========================
     # SCENE LOOP
     # ========================
-    def init_scene(self):
+    def logic(self):
         """
         Decorator to register the main update function for the scene.
         """

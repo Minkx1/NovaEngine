@@ -21,7 +21,7 @@ with Scene1.sprites():
 def scene1():
     pge.fill_background(engine=Engine, color=pge.Colors.WHITE)
 
-    # <-- put here some logic, like @sprite1.set_update()
+    # <-- put here some logic
 
     Scene1.update()
 

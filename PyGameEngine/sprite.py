@@ -29,6 +29,7 @@ class Sprite:
         # Current image (may be transformed)
         self.img = pygame.transform.scale(self.original_img, (self.width, self.height))
         self.original_img = self.img
+        self.original_update = None
         self.rect = self.img.get_rect()
 
         self.x = self.rect.x
@@ -125,6 +126,12 @@ class Group:
         """Draw all alive sprites in the group."""
         for sprite in self.sprites:
             sprite.draw()
+        return self
+
+    def update(self):
+        """Updates all alive sprites in the group."""
+        for sprite in self.sprites:
+            sprite.update()
         return self
 
     def move(self, dx=0, dy=0):
