@@ -1,4 +1,4 @@
-""" ===== scenes.py ===== """
+"""===== scenes.py ====="""
 
 from contextlib import contextmanager
 from .sprite import Sprite, Group
@@ -21,12 +21,11 @@ class Scene:
         """
         self.engine = engine
         self.objects = []  # all sprites in scene
-        self.solids = []   # only solid sprites
-        self.run = None    # main update function
+        self.solids = []  # only solid sprites
+        self.run = None  # main update function
 
         # Register scene in engine
         self.engine.scenes.append(self)
-        self.engine.active_scene = self
 
     # ========================
     # OBJECT MANAGEMENT
@@ -50,6 +49,7 @@ class Scene:
                 def _(): ...
         """
         import inspect
+
         frame = inspect.currentframe().f_back.f_back
         before_vars = set(frame.f_locals.keys())
 
@@ -70,9 +70,11 @@ class Scene:
     # ========================
     def logic(self):
         """Decorator to register the main update function for the scene."""
+
         def decorator(func):
             self.run = func
             return func
+
         return decorator
 
     def update(self):
@@ -82,5 +84,6 @@ class Scene:
                 obj.update()
             except Exception as e:
                 from .engine import log
+
                 # print(f"[SceneManager] Error: {e}")
                 log(e, "SceneManager", True)

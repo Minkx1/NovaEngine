@@ -1,6 +1,7 @@
-""" ===== sprite.py ===== """
+"""===== sprite.py ====="""
 
 import pygame, random, math
+
 
 class Sprite:
     """
@@ -19,21 +20,25 @@ class Sprite:
 
         self.update_func = None
 
-        self.debug_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        self.debug_color = (
+            random.randint(0, 255),
+            random.randint(0, 255),
+            random.randint(0, 255),
+        )
         self.debug = engine.debug
 
         # Load original image (keep for transformations)
         if img_path:
             self.original_img = pygame.image.load(img_path).convert_alpha()
-        else: 
-            self.original_img = pygame.Surface((0,0))
+        else:
+            self.original_img = pygame.Surface((0, 0))
         self.width = width or self.original_img.get_width()
         self.height = height or self.original_img.get_height()
 
         # Current image (may be transformed)
         self.img = pygame.transform.scale(self.original_img, (self.width, self.height))
         self.original_img = self.img
-        self.angle: float = 0 
+        self.angle: float = 0
         self.rect = self.img.get_rect()
         self.x, self.y = self.rect.topleft
 
@@ -49,14 +54,22 @@ class Sprite:
             self.surface.blit(rotated_img, rotated_rect.topleft)
         if self.debug:
             pygame.draw.rect(self.surface, self.debug_color, self.rect, 1)
-            self.engine.render_text(f'{round(self.rect.x)}, {round(self.rect.y)}', self.rect.x, self.rect.y, size=12, center=True)
+            self.engine.render_text(
+                f"{round(self.rect.x)}, {round(self.rect.y)}",
+                self.rect.x,
+                self.rect.y,
+                size=12,
+                center=True,
+            )
         return self
 
     def set_update(self):
         """Decorator to set custom update logic for the sprite."""
+
         def decorator(func):
             self.update_func = func
             return func
+
         return decorator
 
     def set_position(self, x, y):
@@ -126,7 +139,7 @@ class Sprite:
     def collide(self, other=None, rect=None):
         """Check collision with another sprite."""
         ans = False
-        if other:
+        if other and other.alive:
             ans = self.rect.colliderect(other.rect)
         elif rect:
             ans = self.rect.colliderect(rect)
@@ -150,7 +163,7 @@ class Sprite:
                 self.update_func()
             else:
                 self.draw()
-    
+
     # ====== ANIMATIONS ======
     def set_animation(self, name, frames, speed=0.1, loop=True):
         """
@@ -204,7 +217,7 @@ class Sprite:
 
             self.img = anim["frames"][anim["index"]]
             self.rect_update()
-    
+
     @staticmethod
     def CreateImage(path="", width: int = None, height: int = None):
         img = pygame.image.load(path).convert_alpha()
@@ -285,7 +298,7 @@ class Button(Sprite):
     def check(self):
         """Draw button and return True if it was just pressed."""
         self.draw()
-        
+
         clicked = False
         mouse_pos = pygame.mouse.get_pos()
 
@@ -294,13 +307,20 @@ class Button(Sprite):
 
         return clicked
 
+
 class ProgressBar(Sprite):
-    def __init__(self, engine, width, height, 
-                 max_value=100, value=0, 
-                 bg_color=(50, 50, 50), 
-                 fg_color=(0, 200, 0), 
-                 border_color=(0, 0, 0), 
-                 border_width=2):
+    def __init__(
+        self,
+        engine,
+        width,
+        height,
+        max_value=100,
+        value=0,
+        bg_color=(50, 50, 50),
+        fg_color=(0, 200, 0),
+        border_color=(0, 0, 0),
+        border_width=2,
+    ):
         """
         Клас прогрес-бара
         :param engine: посилання на движок
@@ -335,15 +355,26 @@ class ProgressBar(Sprite):
         """Draws progress-bar on the screen"""
         if self.alive:
             # bg
-            pygame.draw.rect(self.surface, self.bg_color, 
-                            self.rect)
+            pygame.draw.rect(self.surface, self.bg_color, self.rect)
             # filled
             fill_w = int((self.value / self.max_value) * self.width)
-            pygame.draw.rect(self.surface, self.fg_color, 
-                            (self.rect.x, self.rect.y, fill_w, self.height))
+            pygame.draw.rect(
+                self.surface,
+                self.fg_color,
+                (self.rect.x, self.rect.y, fill_w, self.height),
+            )
             # Border
             if self.border_width > 0:
-                pygame.draw.rect(self.surface, self.border_color, 
-                                (self.rect.x, self.rect.y, self.width, self.height), self.border_width)
-            
-            self.engine.render_text(f"{self.value} / {self.max_value}", self.rect.centerx, self.rect.centery, center=True)
+                pygame.draw.rect(
+                    self.surface,
+                    self.border_color,
+                    (self.rect.x, self.rect.y, self.width, self.height),
+                    self.border_width,
+                )
+
+            self.engine.render_text(
+                f"{self.value} / {self.max_value}",
+                self.rect.centerx,
+                self.rect.centery,
+                center=True,
+            )
