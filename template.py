@@ -1,5 +1,11 @@
 """ ===== template.py ===== """
 
+"""
+FUTURE PLANS
+* Rework Cooldown
+* Finish DevTools
+"""
+
 import pygame, math
 import SparkEngine as SE
 

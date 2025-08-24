@@ -1,79 +1,241 @@
-# SparkEngine V1.6.0
 
-**SparkEngine** — a lightweight Python Framework that simplifies creating 2D games using [Pygame](https://www.pygame.org/).
-It provides an engine, scene management, sprite handling, movement systems, and basic UI elements.
+---
 
-## How to Start
+# SparkEngine 
 
-### Installation
+**Версія:** 1.6.1
+**Автор:** Minkx1
+**Призначення:** Легкий Python фреймворк на базі PyGame для швидкої розробки 2D ігор із сценами, спрайтами, колізіями, таймерами, звуком та інструментами розробника.
 
-Clone the repository:
+---
+
+## Зміст
+
+1. [Особливості](#особливості)
+2. [Встановлення](#встановлення)
+3. [Швидкий старт](#швидкий-старт)
+4. [Система сцен](#система-сцен)
+5. [Класи спрайтів](#класи-спрайтів)
+6. [Групи спрайтів](#групи-спрайтів)
+7. [Інтервали, таймери, кулдауни](#інтервали-таймери-кулдауни)
+8. [Менеджер звуку](#менеджер-звуку)
+9. [Використання DevTools](#використання-devtools)
+10. [Приклад гри](#приклад-гри)
+
+---
+
+## Особливості
+
+* Простий цикл ігор з PyGame, FPS та рендеринг тексту.
+* Система сцен із контекстним менеджером для автоматичної реєстрації спрайтів.
+* Класи спрайтів з рухом, обертанням, анімаціями та колізіями.
+* Групи спрайтів для масових операцій (draw, update, move, kill).
+* Кнопки, прогрес-бари, HUD.
+* Таймери, кулдауни та інтервали із підтримкою багатопоточності.
+* Легке підключення звуку та музики.
+* DevTools для створення `.exe` та архівів з грою.
+* Кешування тексту для швидкого рендерингу.
+* Простий CLI для виконання команд на фоні (`exec`).
+
+---
+
+## Встановлення
 
 ```bash
-git clone https://github.com/Minkx1/PyGameEngine.git
+pip install pygame
 ```
 
-### Usage Template
+* Скопіювати папку SparkEngine з репозиторію у папку вашого проекта.
+* Імпортувати як модуль:
 
 ```python
-""" ===== template.py ===== """
-
-import pygame
 import SparkEngine as SE
-
-""" --- 1. Initialize PyGameEngine and others --- """
-
-SCREEN_W, SCREEN_H = 900, 600 
-
-Engine = SE.SparkEngine(window_size=(SCREEN_W, SCREEN_H))
-
-""" --- 2. Create Scene, Add assets and Initialize function --- """
-
-Scene1 = SE.Scene(Engine)
-
-with Scene1.sprites():
-    
-    pass 
-
-@Scene1.init_scene()
-def scene1():
-    SE.fill_background(engine=Engine, color=SE.Colors.WHITE)
-
-    # <-- put here some logic
-
-    Scene1.update()
-
-""" --- 3. Initialize Main function with all your project logics --- """
-
-Engine.run(globals())
-
 ```
 
-## Features
+---
 
-* Simple game loop (`init`, `run`) for your project.
-* Scene management: easy creation and switching between scenes.
-* Sprite class for all your logic:
-* UI elements such as **Button**.
-* Utilities:
+## Швидкий старт
 
-  * `Colors` enum for predefined colors.
-  * `render_text()` for quick text rendering.
-  * `fill_background()` for setting background color or image.
-  * `Key_Pressed(), Key_Hold() and MouseClicked` for input handler.
+```python
+import pygame, SparkEngine as SE
 
-* Automatic registration of sprites in a scene using context manager.
-* Solid object management for collision detection.
-* Extensible architecture for events, timers, and animations.
-* Command input for hot debugging.
+Engine = SE.SparkEngine(window_size=(800, 600))
+Engine.set_debug(True)
 
-## Future Plans
+@Engine.main()
+def game_loop():
+    Engine.fill_background(SE.Colors.WHITE)
+    Engine.render_text("Hello SparkEngine!", 400, 300, size=40, center=True)
 
-* Saves Manager (completed)
-* Developer Tools (WorkInProgress: build_exe, build_archive)
-* Animations (completed)
-* Sprite.look_at(completed), ProgressBar(completed)
+Engine.run()
+```
 
-## License
+---
 
-This library is free to use for personal and commercial projects.
+## Система сцен
+
+**Scene** — основний клас для організації об’єктів:
+
+```python
+Main = SE.Scene(Engine)
+
+with Main.init():
+    player = SE.Sprite(Engine, "player.png", 50, 50).place_centered(400, 300)
+
+@Main.logic()
+def scene_logic():
+    Engine.fill_background(SE.Colors.BLACK)
+    Main.update()  # викликає update() для всіх об’єктів
+```
+
+* `add_sprite()` — ручне додавання спрайтів.
+* Контекстний менеджер `with Scene.init():` автоматично реєструє створені об’єкти.
+* `Scene.logic()` — декоратор для основної логіки сцени.
+* `update()` — оновлення всіх спрайтів сцени.
+
+Перемикання сцен:
+
+```python
+Engine.set_active_scene(Main)
+Engine.run_active_scene()
+```
+
+---
+
+## Класи спрайтів
+
+**Sprite**
+
+* `Sprite(engine, img_path, width=None, height=None, solid=False)` — створення спрайта.
+* Методи:
+
+| Метод                                               | Опис                                        |
+| --------------------------------------------------- | ------------------------------------------- |
+| `draw()`                                            | Малює спрайт на екрані                      |
+| `set_update()`                                      | Декоратор для кастомного оновлення          |
+| `set_position(x, y)`                                | Задати координати                           |
+| `place_centered(x, y)`                              | Центрувати спрайт                           |
+| `move(dx, dy)`                                      | Рух на відстань                             |
+| `move_to(target, speed)`                            | Рух до точки або іншого спрайта             |
+| `scale(width, height)`                              | Масштабування                               |
+| `rotate(angle)`                                     | Обертання                                   |
+| `look_at(target)`                                   | Повернутися до цілі                         |
+| `collide(other/rect)`                               | Колізія                                     |
+| `kill()`                                            | Вбити спрайт                                |
+| `update()`                                          | Виконати кастомну логіку або draw           |
+| `set_animation(name, frames, speed=0.1, loop=True)` | Додати анімацію                             |
+| `play_animation(name=None)`                         | Відтворити анімацію                         |
+| `CreateImage(path, width=None, height=None)`        | Статичний метод для завантаження зображення |
+
+**Button(Sprite)**
+
+* `check()` — повертає `True`, якщо кнопка натиснута.
+
+**ProgressBar(Sprite)**
+
+* `set_value(value)` — задати значення
+* `add_value(delta)` — змінити значення
+* `draw()` — малює прогрес-бар
+
+---
+
+## Групи спрайтів
+
+**Group** — контейнер для декількох спрайтів:
+
+```python
+bullets = SE.Group()
+bullets.add(bullet1, bullet2)
+bullets.update()
+colliding = bullets.collide(player)  # список спрайтів, що колізуються
+```
+
+---
+
+## Інтервали, таймери, кулдауни
+
+**Таймер:** виконує функцію через `duration` секунд
+
+```python
+@Engine.Timer(2)
+def say_hi():
+    print("Hello after 2 seconds")
+```
+
+**Кулдаун:** перевірка або створення
+
+```python
+if Engine.Cooldown('shoot', 0.5):
+    shoot()
+```
+
+**Інтервал:** повторення N разів з паузою
+
+```python
+@Engine.Interval(5, 1)  # 5 разів з інтервалом 1 сек
+def spawn_enemy():
+    print("Enemy!")
+```
+
+---
+
+## Менеджер звуку
+
+```python
+from sound import SoundManager
+
+sound = SoundManager()
+sound.load_sound("shot", "assets/shot.wav")
+sound.play_sound("shot", volume=0.5)
+
+sound.play_music("assets/bg_music.mp3", volume=0.8)
+sound.pause_music()
+sound.continue_music()
+sound.stop_music()
+sound.stop_all()
+```
+
+---
+
+## Використання DevTools
+
+**Створення `.exe`:**
+
+```python
+SE.DevTools.build_exe(main_file="main.py", name="MyGame", noconsole=True)
+```
+
+**Створення архіву:**
+
+```python
+SE.DevTools.build_archive(
+    main_file="main.py",
+    name="MyGame",
+    sprite_dir="assets",
+    archive_dist="releases"
+)
+```
+
+---
+
+## Приклад гри
+
+```python
+Engine = SE.SparkEngine(window_size=(900, 600))
+Main = SE.Scene(Engine)
+
+with Main.init():
+    player = SE.Sprite(Engine, "player.png", 100, 100).place_centered(450, 300)
+
+@Main.logic()
+def logic():
+    Engine.fill_background(SE.Colors.WHITE)
+    Main.update()
+
+Engine.set_active_scene(Main)
+Engine.run()
+```
+
+Тут можна додавати групи ворогів, кулі, інтервали для спавну, прогрес-бари HP, кнопки меню та ін.
+
+--- 

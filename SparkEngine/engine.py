@@ -200,6 +200,7 @@ class SparkEngine:
     # ========================
     # MAIN LOOP
     # ========================
+    
     def run(self):
         """Run the main game loop and optional command input thread."""
         import inspect
