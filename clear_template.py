@@ -27,4 +27,4 @@ def scene1():
 
 """ --- 3. Initialize Main function with all your project logics --- """
 
-Engine.run(globals())
+Engine.run()

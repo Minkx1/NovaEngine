@@ -80,16 +80,3 @@ class TopDownMovement:
 
 """ Your Classes that use TopDown can be built here """
 
-class ZombieKillerMovement(TopDownMovement):
-    def __init__(self, speed=5):
-        super().__init__(speed)
-    
-    def update(self, engine, solids, rect):
-        super().update(engine, solids, rect)
-
-        mouse_x,mouse_y = pygame.mouse.get_pos()
-        px,py = self.rect.center[0], self.rect.center[1]
-        
-        mouse_angle_rad = math.atan2(mouse_y - py, mouse_x - px)
-        angle_to_mouse = math.degrees(mouse_angle_rad)
-        self.sprite.rotate(angle_to_mouse)

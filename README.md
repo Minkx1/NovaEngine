@@ -70,9 +70,9 @@ Engine.run(globals())
 ## Future Plans
 
 * Saves Manager (completed)
-* Developer Tools (WorkInProgress)
-* Animations and AnimationHandler
-* Sprite.look_at, ProgressBar
+* Developer Tools (WorkInProgress: build_exe, build_archive)
+* Animations (completed)
+* Sprite.look_at(completed), ProgressBar(completed)
 
 ## License
 

@@ -1,47 +1,62 @@
 """ ===== engine.py ===== """
 
-import pygame, threading, sys, subprocess, time
+import pygame
+import threading
+import sys, os
+import subprocess
+import zipfile
+import time
 from typing import Tuple, Union
-from enum import Enum
 
 pygame.init()
 
 # ========================
 # ENGINE CONSTANTS
 # ========================
-ENGINE_VERSION = "V1.5.2"
+ENGINE_VERSION = "V1.6.0"
 APP_NAME_ENGINE_TEMPLATE = f" | Running with SparkEngine {ENGINE_VERSION}"
 
-def log(msg,sender="SparkEngine", error=False):
+def log(msg: str, sender="SparkEngine", error=False):
+    """
+    Log a message to console.
+
+    Args:
+        msg (str): The message to log.
+        sender (str): The sender's name (default "SparkEngine").
+        error (bool): If True, prefixes with 'Error:'.
+    """
+    prefix = f"[{sender}]"
     if error:
-        print(f"[{sender}] Error: {msg}")
+        print(f"{prefix} Error: {msg}")
     else:
-        print(f"[{sender}] {msg}")
+        print(f"{prefix} {msg}")
 
 class DevTools:
-    def build_exe(main_file="main.py", name="game", icon_path="", onefile=True, noconsole=False, dist_path:str =None):
+    """
+    Developer utilities for packaging and testing.
+    """
+
+    @staticmethod
+    def build_exe(main_file="main.py", name="game", icon_path="",
+                  onefile=True, noconsole=False, dist_path: str = None):
         """
         Build a Windows executable from a Python script using PyInstaller.
-        
-        Parameters:
-            main_file (str): Path to the main Python file (entry point) e.g. main.py
-            name (str): Name of the output exe file (default = 'game').
-            icon (str): Path to an icon file (*.ico) for the exe.
-            onefile (bool): If True, build a single-file exe. If False, create a folder with dependencies.
-            noconsole (bool): If True, disable the console window (for GUI apps).
-            dist_path (str): Directory where the built exe will be stored (default = 'dist/').
+
+        Args:
+            main_file (str): Path to the entry Python file.
+            name (str): Name of the output exe.
+            icon_path (str): Path to an icon file (*.ico).
+            onefile (bool): Build as a single exe or as a folder.
+            noconsole (bool): Hide console (GUI apps only).
+            dist_path (str): Output directory (default = 'dist/').
 
         Notes:
-            - Make sure PyInstaller is installed: pip install pyinstaller
-            - Disable antivirus before building, as some AV may detect false positives.
-            - Run this script from a clean virtual environment to avoid bundling unnecessary packages.
+            - Requires: pip install pyinstaller
+            - Antivirus may give false positives.
+            - Best used inside a clean venv.
         """
+        flags = ["pyinstaller", f"--name={name}"]
 
-        flags = [
-            "pyinstaller",
-            f"--name={name}"
-        ]
-        
         if onefile:
             flags.append("--onefile")
         if noconsole:
@@ -50,19 +65,75 @@ class DevTools:
             flags.append(f"--icon={icon_path}")
         if dist_path:
             flags.append(f"--distpath={dist_path}")
-        
+
         flags.append(main_file)
+
         try:
-            log(sender="DevTools",msg="Building EXE file: ".join(flags))
+            log("Running: " + " ".join(flags), sender="DevTools")
             subprocess.run(flags, check=True)
-            log(f"✅ Build complete! File saved in '{dist_path}/{name}.exe'", sender="DevTools")
+            out_dir = dist_path or "dist"
+            log(f"✅ Build complete! File saved in '{out_dir}/{name}.exe'", sender="DevTools")
         except subprocess.CalledProcessError as e:
             log(f"❌ Build failed: {e}", error=True, sender="DevTools")
+    
+    @staticmethod
+    def build_archive(main_file="main.py", name="game", icon_path:str = None,
+                      onefile=True, noconsole=False, dist_path=None,
+                      sprite_dir="sprites", archive_dist="releases", archive_name:str = None):
+        """
+        Build exe and pack it with asset folder into a .zip archive.
+
+        Args:
+            main_file (str): entry file for PyInstaller
+            name (str): exe name
+            sprite_dir (str): folder with sprites/assets
+            archive_dist (str): where to save archive (default = releases/)
+            archive_name (str): name of archive (default = <name>.zip)
+        """
+        # 1. Спочатку збираємо exe
+        DevTools.build_exe(
+            main_file=main_file,
+            name=name,
+            icon_path=icon_path,
+            onefile=onefile,
+            noconsole=noconsole,
+            dist_path=dist_path
+        )
+
+        exe_path = os.path.join(dist_path or "dist", f"{name}.exe")
+        if not os.path.exists(exe_path):
+            log(f"❌ EXE not found at {exe_path}", error=True, sender="DevTools")
+            return
+
+        # 2. Готуємо архів
+        os.makedirs(archive_dist, exist_ok=True)
+        archive_name = archive_name or f"{name}.zip"
+        archive_path = os.path.join(archive_dist, archive_name)
+
+        try:
+            with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                # Додаємо exe
+                zipf.write(exe_path, arcname=os.path.basename(exe_path))
+
+                # Додаємо папку з ассетами
+                if os.path.isdir(sprite_dir):
+                    for root, _, files in os.walk(sprite_dir):
+                        for file in files:
+                            filepath = os.path.join(root, file)
+                            arcpath = os.path.relpath(filepath, start=os.path.dirname(sprite_dir))
+                            zipf.write(filepath, arcname=arcpath)
+
+            log(f"✅ Archive built: {archive_path}", sender="DevTools")
+
+        except Exception as e:
+            log(f"❌ Archive build failed: {e}", error=True, sender="DevTools")
+
 
 # ========================
 # BASIC COLORS
 # ========================
-class Colors(Enum):
+class Colors():
+    """Predefined RGB colors."""
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     RED   = (255, 0, 0)
@@ -72,14 +143,22 @@ class Colors(Enum):
 
 class SparkEngine:
     """
-    Lightweight PyGame framework for game loop, input handling, scenes, threads, timers, and text rendering.
+    Lightweight PyGame framework for:
+    - game loop, system inputs
+    - input handling
+    - scenes
+    - timers & threads
+    - text rendering
     """
 
     # ========================
     # INITIALIZATION
     # ========================
-    def __init__(self, window_size=(500, 500), app_name="Game", icon_path=None, fps=60, enable_fullscreen=False):
-        """Initialize game window, clock, engine state."""
+    def __init__(self, window_size=(500, 500), app_name="Game",
+                 icon_path=None, fps=60, enable_fullscreen=False):
+        """
+        Initialize the engine window and core systems.
+        """
         self.app_name = app_name
         self.icon_path = icon_path
 
@@ -94,21 +173,26 @@ class SparkEngine:
         self.debug = False
         self.enable_fullscreen = enable_fullscreen
         self.fullscreen = False
+        self.dt:int = 0
 
+        # Input states
         self.m_clck = False
         self.mouse_clicked = False
         self.keys_pressed = []
         self.key_single_state = {}
 
+        # Internal caches
         self._text_cache = {}
         self.cooldowns = {}
         self.intervals = []
 
+        # Scene system
         self.scenes = []
         self.active_scene = None
         self.main_run_func = self.run_active_scene
         self.globals = None
 
+        # Threads
         self.threads = []
         self.cmd_allow = True
         self.running = False
@@ -140,32 +224,35 @@ class SparkEngine:
                     except Exception as e:
                         log(e, error=True)
 
+        # Game loop
         self.running = True
         while self.running:
             self.keys_pressed = pygame.key.get_pressed()
-            self.mouse_clicked = self.MouseClicked(first_itter=True)
+            self.mouse_clicked = self.MouseClicked(first_iter=True)
 
-            # Execute main user logic
-            if self.main_run_func: self.main_run_func()
+            if self.main_run_func:
+                self.main_run_func()
 
-            # Show FPS
-            if self.debug: 
-                self.render_text(f"{round(self.clock.get_fps(), 2)}", 5, 5)
-                self.render_text(f"{pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]}", pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], size=10,center=True)
+            if self.debug:
+                self.render_text(f"{round(self.clock.get_fps(), 2)}", 20, 20)
+                self.render_text(
+                    str(pygame.mouse.get_pos()),
+                    *pygame.mouse.get_pos(), size=10, center=True
+                )
 
-            if self.KeyPressed(pygame.K_F11) and self.enable_fullscreen: 
+            if self.KeyPressed(pygame.K_F11) and self.enable_fullscreen:
                 if self.fullscreen:
                     pygame.display.set_mode(self.screen.get_size())
                 else:
                     pygame.display.set_mode(self.screen.get_size(), pygame.FULLSCREEN)
+                self.fullscreen = not self.fullscreen
 
-            # Handle quit event
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.quit()
 
             pygame.display.flip()
-            self.clock.tick(self.fps)
+            self.dt = self.clock.tick(self.fps)/1000 # getting time passed after each frame
 
     def quit(self):
         """Stop engine and exit program."""
@@ -180,7 +267,7 @@ class SparkEngine:
         return decorator
 
     def new_thread(self):
-        """Decorator to register a function to run in a separate daemon thread."""
+        """Decorator to run function in a separate daemon thread."""
         def decorator(func):
             if func not in self.threads:
                 self.threads.append(func)
@@ -189,6 +276,7 @@ class SparkEngine:
         return decorator
     
     def set_debug(self, value=False):
+        """Enable or disable debug rendering (FPS, mouse pos)."""
         self.debug = value
         return self
 
@@ -204,18 +292,20 @@ class SparkEngine:
             log("Scene not found!", error=True)
 
     def run_active_scene(self):
+        """Run the currently active scene."""
         if self.active_scene:
             self.active_scene.run()
 
     def set_active_scene(self, scene):
+        """Set active scene without running it immediately."""
         self.active_scene = scene
 
     # ========================
     # INPUT MANAGEMENT
     # ========================
-    def MouseClicked(self, button=0, first_itter=False):
-        if not first_itter:
-            """Return True only on first mouse click (not hold)."""
+    def MouseClicked(self, button=0, first_iter=False):
+        """Return True only on first mouse click (not hold)."""
+        if not first_iter:
             pressed = False
             if not self.m_clck and pygame.mouse.get_pressed()[button]:
                 self.m_clck = True
@@ -243,7 +333,7 @@ class SparkEngine:
             return False
 
     def KeyHold(self, key):
-        """Return True while key is held."""
+        """Return True while key is held down."""
         try:
             return bool(self.keys_pressed[key])
         except (IndexError, TypeError):
@@ -268,14 +358,13 @@ class SparkEngine:
                 time.sleep(duration)
                 self.cooldowns[key] = True
         return self.cooldowns.get(key, False)
+
     def Interval(self, count, cooldown):
-        """
-        Calls func $count$ times with delay $cooldown$ seconds.
-        """
+        """Call function `count` times with delay `cooldown` seconds (use -1 for infinite)."""
         def decorator(func):    
             @self.new_thread()
             def cycle():
-                if count==-1:
+                if count == -1:
                     while True:
                         func()
                         time.sleep(cooldown)
@@ -289,7 +378,8 @@ class SparkEngine:
     # ========================
     # UTILITIES
     # ========================
-    def fill_background(self, color: Union[Colors, Tuple[int, int, int]] = Colors.BLACK, image: pygame.Surface = None):
+    def fill_background(self, color: Union[Colors, Tuple[int, int, int]] = Colors.BLACK,
+                        image: pygame.Surface = None):
         """Fill the screen with a color or an image."""
         if image:
             self.screen.blit(image, (0, 0))
@@ -298,8 +388,10 @@ class SparkEngine:
                 color = color.value
             self.screen.fill(color)
 
-    def render_text(self, text: str, x: float, y: float, font: str = "TimesNewRoman", size: int = 14,
-                    color: Union[Colors, Tuple[int, int, int]] = Colors.BLACK, center: bool = False):
+    def render_text(self, text: str, x: float, y: float,
+                    font: str = "TimesNewRoman", size: int = 14,
+                    color: Union[Colors, Tuple[int, int, int]] = Colors.BLACK,
+                    center: bool = False):
         """Render text on screen with caching."""
         if isinstance(color, Colors):
             color = color.value
@@ -312,10 +404,5 @@ class SparkEngine:
             self._text_cache[cache_key] = text_surf
 
         rect = text_surf.get_rect()
-        if center:
-            rect.center = (x, y)
-        else:
-            rect.topleft = (x, y)
-        if not center:
-            rect.topleft = (x, y)
+        rect.center = (x, y) if center else (x, y)
         self.screen.blit(text_surf, rect)
