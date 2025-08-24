@@ -1,4 +1,4 @@
-""" ===== main.py ===== """
+""" ===== template.py ===== """
 
 import pygame
 import SparkEngine as SE

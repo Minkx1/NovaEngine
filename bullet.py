@@ -2,13 +2,7 @@ import pygame, math
 from SparkEngine import Sprite
 
 class Bullet(Sprite):
-    def __init__(
-            self, 
-            engine, 
-            img_path : str,
-            x: float, y: float, 
-            width: float = None, height:float = None,
-            speed: int = 100):
+    def __init__(self, engine, img_path : str, x: float, y: float, width: float = None, height:float = None, speed: int = 100):
         super().__init__(engine, img_path, width, height, False)
 
         self.x, self.y = x, y 
@@ -30,7 +24,6 @@ class Bullet(Sprite):
         if self.alive:
             self.draw()
             self.move(self.vel_x, self.vel_y)
-            
             if (self.x + self.width < 0 or self.x > self.engine.screen.get_width()
                 or self.y + self.height < 0 or self.y > self.engine.screen.get_height()):
                 self.kill()

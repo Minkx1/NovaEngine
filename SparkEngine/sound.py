@@ -2,7 +2,7 @@
 
 import pygame
 
-class SoundHandler:
+class SoundManager:
     def __init__(self):
         pygame.mixer.init()
         self.sounds = {}
@@ -19,7 +19,8 @@ class SoundHandler:
             snd.set_volume(volume)
             snd.play(count)
         else:
-            print(f"[SoundHandler] Sound '{name}' not found")
+            from .engine import log
+            log(f"Sound '{name}' not found", "SoundManager", True)
 
     def play_music(self, path, volume=1.0, loop=-1):
         """Play music in background"""

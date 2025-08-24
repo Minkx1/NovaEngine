@@ -12,6 +12,53 @@ pygame.init()
 ENGINE_VERSION = "V1.5.2"
 APP_NAME_ENGINE_TEMPLATE = f" | Running with SparkEngine {ENGINE_VERSION}"
 
+def log(msg,sender="SparkEngine", error=False):
+    if error:
+        print(f"[{sender}] Error: {msg}")
+    else:
+        print(f"[{sender}] {msg}")
+
+class DevTools:
+    def build_exe(main_file="main.py", name="game", icon_path="", onefile=True, noconsole=False, dist_path:str =None):
+        """
+        Build a Windows executable from a Python script using PyInstaller.
+        
+        Parameters:
+            main_file (str): Path to the main Python file (entry point) e.g. main.py
+            name (str): Name of the output exe file (default = 'game').
+            icon (str): Path to an icon file (*.ico) for the exe.
+            onefile (bool): If True, build a single-file exe. If False, create a folder with dependencies.
+            noconsole (bool): If True, disable the console window (for GUI apps).
+            dist_path (str): Directory where the built exe will be stored (default = 'dist/').
+
+        Notes:
+            - Make sure PyInstaller is installed: pip install pyinstaller
+            - Disable antivirus before building, as some AV may detect false positives.
+            - Run this script from a clean virtual environment to avoid bundling unnecessary packages.
+        """
+
+        flags = [
+            "pyinstaller",
+            f"--name={name}"
+        ]
+        
+        if onefile:
+            flags.append("--onefile")
+        if noconsole:
+            flags.append("--noconsole")
+        if icon_path:
+            flags.append(f"--icon={icon_path}")
+        if dist_path:
+            flags.append(f"--distpath={dist_path}")
+        
+        flags.append(main_file)
+        try:
+            log(sender="DevTools",msg="Building EXE file: ".join(flags))
+            subprocess.run(flags, check=True)
+            log(f"✅ Build complete! File saved in '{dist_path}/{name}.exe'", sender="DevTools")
+        except subprocess.CalledProcessError as e:
+            log(f"❌ Build failed: {e}", error=True, sender="DevTools")
+
 # ========================
 # BASIC COLORS
 # ========================
@@ -31,19 +78,25 @@ class SparkEngine:
     # ========================
     # INITIALIZATION
     # ========================
-    def __init__(self, window_size=(500, 500), app_name="Game", icon_path=None, fps=60, show_fps=False):
+    def __init__(self, window_size=(500, 500), app_name="Game", icon_path=None, fps=60, enable_fullscreen=False):
         """Initialize game window, clock, engine state."""
-        self.screen = pygame.display.set_mode(window_size)
-        pygame.display.set_caption(app_name + APP_NAME_ENGINE_TEMPLATE)
+        self.app_name = app_name
+        self.icon_path = icon_path
 
-        if icon_path:
+        self.screen = pygame.display.set_mode(window_size)
+        pygame.display.set_caption(self.app_name + APP_NAME_ENGINE_TEMPLATE)
+
+        if self.icon_path:
             pygame.display.set_icon(pygame.image.load(icon_path).convert_alpha())
 
         self.clock = pygame.time.Clock()
         self.fps = fps
-        self.show_fps = show_fps
-        self.m_clck = False
+        self.debug = False
+        self.enable_fullscreen = enable_fullscreen
+        self.fullscreen = False
 
+        self.m_clck = False
+        self.mouse_clicked = False
         self.keys_pressed = []
         self.key_single_state = {}
 
@@ -54,6 +107,7 @@ class SparkEngine:
         self.scenes = []
         self.active_scene = None
         self.main_run_func = self.run_active_scene
+        self.globals = None
 
         self.threads = []
         self.cmd_allow = True
@@ -62,9 +116,11 @@ class SparkEngine:
     # ========================
     # MAIN LOOP
     # ========================
-    def run(self, main_globals=None):
+    def run(self):
         """Run the main game loop and optional command input thread."""
-        self.console_vars = main_globals or {}
+        import inspect
+        caller_frame = inspect.currentframe().f_back
+        self.globals = caller_frame.f_globals
 
         # Start command input thread
         if self.cmd_allow:
@@ -80,24 +136,33 @@ class SparkEngine:
                         self.quit()
                         break
                     try:
-                        exec(cmd, getattr(self, "console_vars", {}))
+                        exec(cmd, getattr(self, "globals", {}))
                     except Exception as e:
-                        print("Error:", e)
+                        log(e, error=True)
 
         self.running = True
         while self.running:
             self.keys_pressed = pygame.key.get_pressed()
+            self.mouse_clicked = self.MouseClicked(first_itter=True)
 
             # Execute main user logic
             if self.main_run_func: self.main_run_func()
 
             # Show FPS
-            if self.show_fps: self.render_text(f"{round(self.clock.get_fps(), 2)}", 5, 5)
+            if self.debug: 
+                self.render_text(f"{round(self.clock.get_fps(), 2)}", 5, 5)
+                self.render_text(f"{pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]}", pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], size=10,center=True)
+
+            if self.KeyPressed(pygame.K_F11) and self.enable_fullscreen: 
+                if self.fullscreen:
+                    pygame.display.set_mode(self.screen.get_size())
+                else:
+                    pygame.display.set_mode(self.screen.get_size(), pygame.FULLSCREEN)
 
             # Handle quit event
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    self.quit()
 
             pygame.display.flip()
             self.clock.tick(self.fps)
@@ -105,8 +170,7 @@ class SparkEngine:
     def quit(self):
         """Stop engine and exit program."""
         self.running = False
-        print("[SparkEngine] Quitting the game")
-        sys.exit()
+        log("Quitting the game...")
 
     def main(self):
         """Decorator to register main game logic."""
@@ -123,6 +187,10 @@ class SparkEngine:
                 threading.Thread(target=func, daemon=True).start()
             return func
         return decorator
+    
+    def set_debug(self, value=False):
+        self.debug = value
+        return self
 
     # ========================
     # SCENE MANAGEMENT
@@ -133,7 +201,7 @@ class SparkEngine:
             self.active_scene = scene
             scene.run()
         else:
-            print("[SparkEngine] Scene not found!")
+            log("Scene not found!", error=True)
 
     def run_active_scene(self):
         if self.active_scene:
@@ -145,15 +213,18 @@ class SparkEngine:
     # ========================
     # INPUT MANAGEMENT
     # ========================
-    def MouseClicked(self, button=0):
-        """Return True only on first mouse click (not hold)."""
-        pressed = False
-        if not self.m_clck and pygame.mouse.get_pressed()[button]:
-            self.m_clck = True
-            pressed = True
-        if not pygame.mouse.get_pressed()[button]:
-            self.m_clck = False
-        return pressed
+    def MouseClicked(self, button=0, first_itter=False):
+        if not first_itter:
+            """Return True only on first mouse click (not hold)."""
+            pressed = False
+            if not self.m_clck and pygame.mouse.get_pressed()[button]:
+                self.m_clck = True
+                pressed = True
+            if not pygame.mouse.get_pressed()[button]:
+                self.m_clck = False
+            return pressed
+        else:
+            return self.mouse_clicked
 
     def KeyPressed(self, key):
         """Return True only on first key press (not hold)."""
@@ -197,6 +268,23 @@ class SparkEngine:
                 time.sleep(duration)
                 self.cooldowns[key] = True
         return self.cooldowns.get(key, False)
+    def Interval(self, count, cooldown):
+        """
+        Calls func $count$ times with delay $cooldown$ seconds.
+        """
+        def decorator(func):    
+            @self.new_thread()
+            def cycle():
+                if count==-1:
+                    while True:
+                        func()
+                        time.sleep(cooldown)
+                else:
+                    for _ in range(count):
+                        func()
+                        time.sleep(cooldown)
+            return func
+        return decorator
 
     # ========================
     # UTILITIES

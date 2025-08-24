@@ -1,4 +1,4 @@
-# SparkEngine V1.5.2
+# SparkEngine V1.6.0
 
 **SparkEngine** — a lightweight Python Framework that simplifies creating 2D games using [Pygame](https://www.pygame.org/).
 It provides an engine, scene management, sprite handling, movement systems, and basic UI elements.
@@ -66,6 +66,13 @@ Engine.run(globals())
 * Solid object management for collision detection.
 * Extensible architecture for events, timers, and animations.
 * Command input for hot debugging.
+
+## Future Plans
+
+* Saves Manager (completed)
+* Developer Tools (WorkInProgress)
+* Animations and AnimationHandler
+* Sprite.look_at, ProgressBar
 
 ## License
 

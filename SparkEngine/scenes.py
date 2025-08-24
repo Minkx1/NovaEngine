@@ -78,4 +78,9 @@ class Scene:
     def update(self):
         """Call update() on all scene objects."""
         for obj in self.objects:
-            obj.update()
+            try:
+                obj.update()
+            except Exception as e:
+                from .engine import log
+                # print(f"[SceneManager] Error: {e}")
+                log(e, "SceneManager", True)

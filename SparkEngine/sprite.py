@@ -1,6 +1,6 @@
 """ ===== sprite.py ===== """
 
-import pygame
+import pygame, random
 
 class Sprite:
     """
@@ -18,6 +18,9 @@ class Sprite:
 
         self.update_func = None
 
+        self.debug_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        self.debug = engine.debug
+
         # Load original image (keep for transformations)
         self.original_img = pygame.image.load(img_path).convert_alpha()
         self.width = width or self.original_img.get_width()
@@ -33,6 +36,9 @@ class Sprite:
         """Draw sprite to the screen surface."""
         if self.alive:
             self.surface.blit(self.img, self.rect)
+        if self.debug:
+            pygame.draw.rect(self.surface, self.debug_color, self.rect, 1)
+            self.engine.render_text(f'{round(self.rect.x)}, {round(self.rect.y)}', self.rect.x, self.rect.y, size=12, center=True)
         return self
 
     def set_update(self):
@@ -95,6 +101,11 @@ class Sprite:
             self.update_func()
         else:
             self.draw()
+    
+    def CreateImage(path="", width: int = None, height: int = None):
+        img = pygame.image.load(path).convert_alpha()
+        if width and height: img = pygame.transform.scale(img, (width, height))
+        return img
 
 
 class Group:
@@ -163,17 +174,17 @@ class Group:
 
 
 class Button(Sprite):
-    last_pressed = False
-
     def __init__(self, engine, img_path, width=None, height=None):
         super().__init__(engine, img_path, width=width, height=height)
 
     def check(self):
         """Draw button and return True if it was just pressed."""
         self.draw()
+        
+        clicked = False
         mouse_pos = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()[0]
 
-        clicked = mouse_pressed and self.rect.collidepoint(mouse_pos) and not Button.last_pressed
-        Button.last_pressed = mouse_pressed
+        if self.rect.collidepoint(mouse_pos):
+            clicked = self.engine.MouseClicked()
+
         return clicked

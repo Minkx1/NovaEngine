@@ -1,3 +1,5 @@
+""" ===== template.py ===== """
+
 import pygame
 import SparkEngine as SE
 from bullet import Bullet
@@ -9,14 +11,17 @@ SCREEN_W, SCREEN_H = 900, 600
 PLAYER_SPEED = 5
 MAGAZINE_SIZE = 10
 
-Engine = SE.SparkEngine(window_size=(SCREEN_W, SCREEN_H), fps=60, show_fps=True)
+Engine = SE.SparkEngine(window_size=(SCREEN_W, SCREEN_H)).set_debug(False)
+SaveManager = SE.SaveManager(Engine)
 
 # ========================
 # 2. Create Scene
 # ========================
-Scene1 = SE.Scene(Engine)
+Main = SE.Scene(Engine)
 
-with Scene1.init():
+with Main.init():
+    home_button = SE.Button(Engine, "assets/buttons/Home_Button.png", 50, 50).place_centered(SCREEN_W-35, 35)
+
     player = SE.Sprite(Engine, "assets/player.png", width=120, height=103).place_centered(SCREEN_W/2, SCREEN_H/2)
     player.magazine = MAGAZINE_SIZE
 
@@ -29,7 +34,7 @@ with Scene1.init():
 
     @player.set_update()
     def update_player():
-        SE.ZombieKillerMovement().update(Engine, Scene1.solids, player)
+        SE.ZombieKillerMovement().update(Engine, Main.solids, player)
 
         if Engine.MouseClicked():
             shoot_bullet()
@@ -45,16 +50,42 @@ with Scene1.init():
 
         player.draw()
 
+Menu = SE.Scene(Engine)
+
+with Menu.init():
+    play_button = SE.Button(Engine, "assets/buttons/Play_Button.png", 300, 100).place_centered(SCREEN_W/2, 100)
+    quit_button = SE.Button(Engine, "assets/buttons/Quit_Button.png", 300, 100).place_centered(SCREEN_W/2, 220)
+    bg = SE.Sprite.CreateImage("assets/menu_bg.png", SCREEN_W, SCREEN_H)
+
 # ========================
 # 3. Scene logic
 # ========================
-@Scene1.logic()
-def scene1_logic():
+@Main.logic()
+def main_logic():
     Engine.fill_background(SE.Colors.WHITE)
-    Scene1.update()
+
+    if home_button.check():Engine.set_active_scene(Menu)
+    
+    Main.update()
     Engine.render_text(f"Round: {player.magazine}", SCREEN_W-70, SCREEN_H-20, size=30, color=SE.Colors.RED, center=True)
+
+@Menu.logic()
+def menu_logic():
+    Engine.fill_background(image=bg)
+    if quit_button.check(): Engine.quit()
+    if play_button.check(): Engine.set_active_scene(Main)
 
 # ========================
 # 4. Run Engine
 # ========================
-Engine.run(globals())
+
+SaveManager.set_vars(["player.rect.x", "player.rect.y", "player.magazine"])
+
+SaveManager.load()
+
+Engine.set_active_scene(Menu)
+Engine.run()
+
+SaveManager.save()
+
+# SE.DevTools.build_exe(main_file="template.py", name="app", noconsole=True)
