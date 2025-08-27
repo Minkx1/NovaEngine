@@ -1,13 +1,13 @@
 """ ===== template.py ===== """
 
 import pygame
-import SparkEngine as SE
+import NovaEngine as SE
 
 """ --- 1. Initialize PyGameEngine and others --- """
 
 SCREEN_W, SCREEN_H = 900, 600 
 
-Engine = SE.SparkEngine(window_size=(SCREEN_W, SCREEN_H))
+Engine = SE.NovaEngine(window_size=(SCREEN_W, SCREEN_H))
 
 """ --- 2. Create Scene, Add assets and Initialize function --- """
 

@@ -7,14 +7,14 @@ FUTURE PLANS
 """
 
 import pygame, math, random
-import SparkEngine as SE
+import NovaEngine as nova
 
 SCREEN = (900, 600)
 SCREEN_W, SCREEN_H = SCREEN[0],SCREEN[1]
 MAGAZINE_SIZE = 10
 
 
-class Zombie(SE.Sprite):
+class Zombie(nova.Sprite):
     def __init__(
         self,
         engine,
@@ -49,7 +49,7 @@ class Zombie(SE.Sprite):
             self.draw()
 
 
-class Bullet(SE.Sprite):
+class Bullet(nova.Sprite):
     def __init__(
         self,
         engine,
@@ -87,7 +87,7 @@ class Bullet(SE.Sprite):
                 self.kill()
 
 
-class Player(SE.Sprite):
+class Player(nova.Sprite):
     def __init__(
         self,
         engine,
@@ -95,7 +95,7 @@ class Player(SE.Sprite):
         width=None,
         height=None,
         speed=5,
-        solids: list[SE.Sprite] = None,
+        solids: list[nova.Sprite] = None,
     ):
         super().__init__(engine, img_path, width, height, solid=False)
         self.speed = speed
@@ -115,7 +115,7 @@ class Player(SE.Sprite):
         return wrapper
 
     def update(self):
-        SE.TopDownMovement().update(self.engine, self.solids, self)
+        nova.TopDownMovement().update(self.engine, self.solids, self)
 
         self.look_at(pygame.mouse.get_pos())
 
@@ -145,17 +145,17 @@ class Player(SE.Sprite):
 # 1. Initialize Engine
 # ========================
 
-Engine = SE.SparkEngine(window_size=SCREEN).set_debug(True)
-SaveManager = SE.SaveManager(Engine)
+Engine = nova.NovaEngine(window_size=SCREEN).set_debug(True)
+SaveManager = nova.SaveManager(Engine)
 
 # ========================
 # 2. Create Scenes
 # ========================
 
-Main = SE.Scene(Engine)
+Main = nova.Scene(Engine)
 
 with Main.sprites():
-    home_button = SE.Button(
+    home_button = nova.Button(
         Engine, "assets/buttons/Home_Button.png", 50, 50
     ).place_centered(SCREEN_W - 35, 35)
 
@@ -163,11 +163,11 @@ with Main.sprites():
         Engine, "assets/player.png", width=120, height=103, solids=Main.solids
     ).place_centered(SCREEN_W / 2, SCREEN_H / 2)
 
-    bullets = SE.Group()
-    zombies = SE.Group()
+    bullets = nova.Group()
+    zombies = nova.Group()
 
-    hp_bar = SE.ProgressBar(
-        Engine, 250, 75, player.hp, player.hp, bg_color=SE.Colors.RED
+    hp_bar = nova.ProgressBar(
+        Engine, 250, 75, player.hp, player.hp, bg_color=nova.Colors.RED
     ).set_position(10, SCREEN_H - 85)
 
     @hp_bar.set_update()
@@ -189,16 +189,16 @@ with Main.sprites():
             )
             player.magazine -= 1
 
-Menu = SE.Scene(Engine)
+Menu = nova.Scene(Engine)
 
 with Menu.sprites():
-    play_button = SE.Button(
+    play_button = nova.Button(
         Engine, "assets/buttons/Play_Button.png", 300, 100
     ).place_centered(SCREEN_W / 2, 100)
-    quit_button = SE.Button(
+    quit_button = nova.Button(
         Engine, "assets/buttons/Quit_Button.png", 300, 100
     ).place_centered(SCREEN_W / 2, 220)
-    bg = SE.Sprite.CreateImage("assets/menu_bg.png", SCREEN_W, SCREEN_H)
+    bg = nova.Sprite.CreateImage("assets/menu_bg.png", SCREEN_W, SCREEN_H)
 
 # ========================
 # 3. Scenes logic
@@ -206,7 +206,7 @@ with Menu.sprites():
 
 @Main.function()
 def main_logic():
-    Engine.fill_background(SE.Colors.WHITE)
+    Engine.fill_background(nova.Colors.WHITE)
 
     if home_button.check(): Engine.set_active_scene(Menu)
     if Engine.KeyPressed(pygame.K_ESCAPE): Engine.set_active_scene(Menu)
@@ -216,7 +216,7 @@ def main_logic():
         SCREEN_W - 70,
         SCREEN_H - 20,
         size=30,
-        color=SE.Colors.RED,
+        color=nova.Colors.RED,
         center=True,
     )
 

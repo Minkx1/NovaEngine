@@ -13,17 +13,17 @@ pygame.init()
 # ========================
 # ENGINE CONSTANTS
 # ========================
-ENGINE_VERSION = "V1.6.1"
-APP_NAME_ENGINE_TEMPLATE = f" | Running with SparkEngine {ENGINE_VERSION}"
+ENGINE_VERSION = "V1.6.4"
+APP_NAME_ENGINE_TEMPLATE = f" | Running with NovaEngine {ENGINE_VERSION}"
 
 
-def log(msg: str, sender="SparkEngine", error=False):
+def log(msg: str, sender="NovaEngine", error=False):
     """
     Log a message to console.
 
     Args:
         msg (str): The message to log.
-        sender (str): The sender's name (default "SparkEngine").
+        sender (str): The sender's name (default "NovaEngine").
         error (bool): If True, prefixes with 'Error:'.
     """
     prefix = f"[{sender}]"
@@ -163,7 +163,7 @@ class Colors:
     BLUE = (0, 0, 255)
 
 
-class SparkEngine:
+class NovaEngine:
     """
     Lightweight PyGame framework for:
     - game loop, system inputs

@@ -1,9 +1,9 @@
 
 ---
 
-# SparkEngine 
+# NovaEngine 
 
-**Версія:** 1.6.2
+**Версія:** 1.6.4
 
 **Автор:** Minkx1
 
@@ -47,11 +47,11 @@
 pip install pygame
 ```
 
-* Скопіювати папку SparkEngine з репозиторію у папку вашого проекта.
+* Скопіювати папку NovaEngine з репозиторію у папку вашого проекта.
 * Імпортувати як модуль:
 
 ```python
-import SparkEngine as SE
+import NovaEngine as SE
 ```
 
 ---
@@ -59,15 +59,16 @@ import SparkEngine as SE
 ## Швидкий старт
 
 ```python
-import pygame, SparkEngine as SE
+import pygame 
+import NovaEngine as nova
 
-Engine = SE.SparkEngine(window_size=(800, 600))
+Engine = nova.NovaEngine(window_size=(800, 600))
 Engine.set_debug(True)
 
 @Engine.main()
 def game_loop():
-    Engine.fill_background(SE.Colors.WHITE)
-    Engine.render_text("Hello SparkEngine!", 400, 300, size=40, center=True)
+    Engine.fill_background(nova.Colors.WHITE)
+    Engine.render_text("Hello NovaEngine!", 400, 300, size=40, center=True)
 
 Engine.run()
 ```
@@ -79,14 +80,14 @@ Engine.run()
 **Scene** — основний клас для організації об’єктів:
 
 ```python
-Main = SE.Scene(Engine)
+Main = nova.Scene(Engine)
 
 with Main.init():
-    player = SE.Sprite(Engine, "player.png", 50, 50).place_centered(400, 300)
+    player = nova.Sprite(Engine, "player.png", 50, 50).place_centered(400, 300)
 
 @Main.logic()
 def scene_logic():
-    Engine.fill_background(SE.Colors.BLACK)
+    Engine.fill_background(nova.Colors.BLACK)
     Main.update()  # викликає update() для всіх об’єктів
 ```
 
@@ -146,7 +147,7 @@ Engine.run_active_scene()
 **Group** — контейнер для декількох спрайтів:
 
 ```python
-bullets = SE.Group()
+bullets = nova.Group()
 bullets.add(bullet1, bullet2)
 bullets.update()
 colliding = bullets.collide(player)  # список спрайтів, що колізуються
@@ -204,13 +205,13 @@ sound.stop_all()
 **Створення `.exe`:**
 
 ```python
-SE.DevTools.build_exe(main_file="main.py", name="MyGame", noconsole=True)
+nova.DevTools.build_exe(main_file="main.py", name="MyGame", noconsole=True)
 ```
 
 **Створення архіву:**
 
 ```python
-SE.DevTools.build_archive(
+nova.DevTools.build_archive(
     main_file="main.py",
     name="MyGame",
     sprite_dir="assets",
@@ -223,15 +224,15 @@ SE.DevTools.build_archive(
 ## Приклад гри
 
 ```python
-Engine = SE.SparkEngine(window_size=(900, 600))
-Main = SE.Scene(Engine)
+Engine = nova.NovaEngine(window_size=(900, 600))
+Main = nova.Scene(Engine)
 
 with Main.init():
-    player = SE.Sprite(Engine, "player.png", 100, 100).place_centered(450, 300)
+    player = nova.Sprite(Engine, "player.png", 100, 100).place_centered(450, 300)
 
 @Main.logic()
 def logic():
-    Engine.fill_background(SE.Colors.WHITE)
+    Engine.fill_background(nova.Colors.WHITE)
     Main.update()
 
 Engine.set_active_scene(Main)

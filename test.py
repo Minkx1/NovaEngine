@@ -1,8 +1,8 @@
 import pygame
-import SparkEngine as SE
+import NovaEngine as SE
 
 SCREEN = (500, 500)
-Engine = SE.SparkEngine(SCREEN, "TestSparkEngine", "assets/button.png").set_debug(True)
+Engine = SE.NovaEngine(SCREEN, "TestNovaEngine", "assets/button.png").set_debug(True)
 PLAYER_SPEED = 5
 
 player = SE.Sprite(Engine, "assets/player.png", 120, 103)

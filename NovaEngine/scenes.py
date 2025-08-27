@@ -17,7 +17,7 @@ class Scene:
         Initialize a new scene.
 
         Args:
-            engine: SparkEngine instance
+            engine: NovaEngine instance
         """
         self.engine = engine
         self.objects = []  # all sprites in scene
