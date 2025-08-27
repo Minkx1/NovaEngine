@@ -1,4 +1,4 @@
-from .engine import NovaEngine, Colors, DevTools
+from .engine import NovaEngine, Colors, DevTools, log
 from .sprite import Sprite, Group
 from .additional_classes import Button, ProgressBar, Projectile
 from .scenes import Scene

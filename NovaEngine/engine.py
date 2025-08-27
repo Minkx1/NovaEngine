@@ -6,6 +6,7 @@ import sys, os
 import subprocess
 import zipfile
 import time
+import inspect
 from typing import Tuple, Union
 
 pygame.init()
@@ -31,6 +32,19 @@ def log(msg: str, sender="NovaEngine", error=False):
         print(f"{prefix} Error: {msg}")
     else:
         print(f"{prefix} {msg}")
+
+def get_globals() -> dict:
+    """
+    Return the global variables of the script that started the call chain (script __main__).
+    Works even if called inside a method of a class or engine.
+    """
+    frame = inspect.currentframe()
+    while frame:
+        globs = frame.f_globals
+        if globs.get("__name__") == "__main__":
+            return globs
+        frame = frame.f_back
+    return {}
 
 
 class DevTools:
@@ -231,10 +245,7 @@ class NovaEngine:
 
     def run(self, first_scene = None):
         """Run the main game loop and optional command input thread."""
-        import inspect
-
-        caller_frame = inspect.currentframe().f_back
-        self.globals = caller_frame.f_globals
+        self.globals = get_globals()        
 
         # Start command input thread
         if self.cmd_allow:

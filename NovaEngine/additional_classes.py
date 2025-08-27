@@ -26,9 +26,9 @@ class ProgressBar(Sprite):
         width,
         height,
         max_value=100,
-        value=0,
+        start_value=0,
         bg_color=(50, 50, 50),
-        fg_color=(0, 200, 0),
+        fill_color=(0, 200, 0),
         border_color=(0, 0, 0),
         border_width=2,
     ):
@@ -47,10 +47,10 @@ class ProgressBar(Sprite):
         super().__init__(engine, None, width, height)
 
         self.max_value = max_value
-        self.value = value
+        self.value = start_value
 
         self.bg_color = bg_color
-        self.fg_color = fg_color
+        self.fg_color = fill_color
         self.border_color = border_color
         self.border_width = border_width
 
@@ -61,6 +61,22 @@ class ProgressBar(Sprite):
     def add_value(self, delta):
         """Додати/відняти значення"""
         self.set_value(self.value + delta)
+    
+    def bind(self, var: str):
+        from .engine import get_globals
+        GLOBALS = get_globals()
+
+        parts = var.split(".")
+        obj_name = parts[0]
+        attr_name = parts[1]
+
+        obj = GLOBALS.get(obj_name)
+        if obj is None:
+            raise ValueError(f"Object '{obj_name}' not found in main globals")
+
+        self.bound_obj = obj
+        self.bound_attr = attr_name
+        return self
 
     def draw(self):
         """Draws progress-bar on the screen"""
@@ -83,13 +99,19 @@ class ProgressBar(Sprite):
                     self.border_width,
                 )
 
+            # text
             self.engine.render_text(
                 f"{self.value} / {self.max_value}",
                 self.rect.centerx,
                 self.rect.centery,
                 center=True,
             )
-
+    
+    def update(self):
+        # if bound
+        if self.bound_obj and self.bound_attr:
+            self.value = getattr(self.bound_obj, self.bound_attr)
+        self.draw()
 
 class Projectile(Sprite):
     def __init__(self, engine, img_path, width=None, height=None, start = None, target = None, speed:int = 100):
@@ -97,7 +119,7 @@ class Projectile(Sprite):
         self.start = start
         self.target = target
         self.speed = speed
-        
+
         try:
             sx, sy = start[0],start[1] 
             self.place_centered(sx, sy)

@@ -166,13 +166,9 @@ with Main.sprites():
     zombies = nova.Group()
 
     hp_bar = nova.ProgressBar(
-        Engine, 250, 75, player.hp, player.hp, bg_color=nova.Colors.RED
+        Engine, 250, 75, 100, player.hp, bg_color=nova.Colors.RED
     ).set_position(10, SCREEN_H - 85)
-
-    @hp_bar.set_update()
-    def hp_bar_upd():
-        hp_bar.draw()
-        hp_bar.set_value(player.hp)
+    hp_bar.bind("player.hp")
 
     @player.set_shoot()
     def shoot_bullet():
@@ -237,12 +233,12 @@ def zombie_spawn():
     side = random.choice(["left", "right", "top", "bottom"])
 
     if side == "left":
-        x, y = -50, random.randint(0, SCREEN_H)   # за межами зліва
+        x, y = -50, random.randint(0, SCREEN_H)   
     elif side == "right":
         x, y = SCREEN_W + 50, random.randint(0, SCREEN_H)
     elif side == "top":
         x, y = random.randint(0, SCREEN_W), -50
-    else:  # bottom
+    else: 
         x, y = random.randint(0, SCREEN_W), SCREEN_H + 50
 
     zombies.add(
