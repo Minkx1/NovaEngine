@@ -2,8 +2,7 @@
 
 """
 FUTURE PLANS
-* Rework Cooldown
-* Finish DevTools
+* 
 """
 
 import pygame, math, random

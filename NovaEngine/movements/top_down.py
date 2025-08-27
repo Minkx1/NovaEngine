@@ -1,5 +1,45 @@
 import pygame,math
 
+class simpleTopDown:
+    def __init__(self, speed=5):
+        self.speed = speed
+        self.engine = None
+        self.rect = None
+        self.solids = []
+
+    def update(self, engine, sprite):
+        """Updates movement and collisions."""
+        self.engine = engine
+        self.sprite = sprite
+        self.rect = self.sprite.rect
+        self.keys = self.engine.keys_pressed
+
+        dx, dy = self._handle_input(self.keys)
+        self._move(dx, dy)
+        return self
+
+    def _handle_input(self, keys):
+        """Returns movement direction (dx, dy)."""
+        dx, dy = 0, 0
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            dx = -self.speed
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            dx = self.speed
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
+            dy = -self.speed
+        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            dy = self.speed
+        return dx, dy
+
+    def _move(self, dx, dy):
+        """Moves and resolves collisions."""
+        # Horizontal movement
+        self.rect.x += dx
+
+        # Vertical movement
+        self.rect.y += dy
+
+
 class TopDownMovement:
     """
     Class for top-down character movement:
