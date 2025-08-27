@@ -247,13 +247,17 @@ class SparkEngine:
                         self.quit()
                         break
                     elif cmd == "restart()":
-                        subprocess.Popen([sys.executable] + sys.argv)
+                        subprocess.Popen(
+                            [sys.executable] + sys.argv,
+                            creationflags=subprocess.CREATE_NEW_CONSOLE  # new console
+                        )
                         self.quit()
                         break
-                    try:
-                        exec(cmd, getattr(self, "globals", {}))
-                    except Exception as e:
-                        log(e, error=True)
+                    else:
+                        try:
+                            exec(cmd, getattr(self, "globals", {}))
+                        except Exception as e:
+                            log(e, error=True)
 
         # Game loop
 
@@ -303,6 +307,7 @@ class SparkEngine:
         """Stop engine and exit program."""
         self.running = False
         log("Quitting the game...")
+        sys.exit()
 
     def main(self):
         """Decorator to register main game logic."""

@@ -154,7 +154,7 @@ SaveManager = SE.SaveManager(Engine)
 
 Main = SE.Scene(Engine)
 
-with Main.init():
+with Main.sprites():
     home_button = SE.Button(
         Engine, "assets/buttons/Home_Button.png", 50, 50
     ).place_centered(SCREEN_W - 35, 35)
@@ -189,10 +189,9 @@ with Main.init():
             )
             player.magazine -= 1
 
-
 Menu = SE.Scene(Engine)
 
-with Menu.init():
+with Menu.sprites():
     play_button = SE.Button(
         Engine, "assets/buttons/Play_Button.png", 300, 100
     ).place_centered(SCREEN_W / 2, 100)
@@ -201,12 +200,11 @@ with Menu.init():
     ).place_centered(SCREEN_W / 2, 220)
     bg = SE.Sprite.CreateImage("assets/menu_bg.png", SCREEN_W, SCREEN_H)
 
-
 # ========================
 # 3. Scenes logic
 # ========================
 
-@Main.logic()
+@Main.function()
 def main_logic():
     Engine.fill_background(SE.Colors.WHITE)
 
@@ -224,7 +222,7 @@ def main_logic():
 
     Main.update()
     
-@Menu.logic()
+@Menu.function()
 def menu_logic():
     Engine.fill_background(image=bg)
 
@@ -254,4 +252,4 @@ def zombie_spawn():
 
 Engine.run(Menu)
 
-# SE.DevTools.build_exe(main_file="template.py", name="app", noconsole=True)
+# SE.DevTools.build_archive(main_file = "template.py", name = "test_template", sprite_dir = "assets", archive_name = "releaseV1.0-test.zip")

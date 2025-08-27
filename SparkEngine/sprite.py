@@ -72,10 +72,12 @@ class Sprite:
 
         return decorator
 
-    def set_position(self, x, y):
+    def set_position(self, x:float = None, y:float = None):
         """Set top-left position of the sprite."""
-        self.rect.topleft = (x, y)
-        self.x, self.y = x, y
+        if (x or y):
+            if not x: self.y = y
+            if not y: self.x = x
+        self.rect.topleft = (self.x, self.y) 
         return self
 
     def place_centered(self, x, y):
@@ -115,6 +117,12 @@ class Sprite:
             # moveing sprite
             self.rect.x += dx * speed * self.engine.dt
             self.rect.y += dy * speed * self.engine.dt
+    
+    def move_angle(self, speed):
+        ang = self.angle + 90
+        dx = math.sin(math.radians(ang))*speed
+        dy = math.cos(math.radians(ang))*speed
+        self.move(dx, dy)
 
     def scale(self, width, height):
         """Scale sprite to (width, height), keeping it centered."""
@@ -255,6 +263,8 @@ class Group:
     def update(self):
         for sprite in self.sprites:
             sprite.update()
+            if not sprite.alive:
+                self.remove(sprite)
         return self
 
     def move(self, dx=0, dy=0):

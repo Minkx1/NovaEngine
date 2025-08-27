@@ -38,7 +38,7 @@ class Scene:
                 self.solids.append(obj)
 
     @contextmanager
-    def init(self):
+    def sprites(self):
         """
         Context manager to auto-register newly created sprites.
         Usage:
@@ -68,7 +68,7 @@ class Scene:
     # ========================
     # SCENE LOOP
     # ========================
-    def logic(self):
+    def function(self):
         """Decorator to register the main update function for the scene."""
 
         def decorator(func):
