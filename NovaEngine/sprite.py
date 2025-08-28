@@ -12,7 +12,7 @@ class Sprite:
     - animation handling
     """
 
-    def __init__(self, engine, img_path, width=None, height=None, solid=False):
+    def __init__(self, engine, img_path: str, width: float = None, height: float = None, solid: bool = False):
         self.engine = engine
         self.surface = self.engine.screen
         self.solid = solid
@@ -30,14 +30,18 @@ class Sprite:
         # Load original image (keep for transformations)
         if img_path:
             self.original_img = pygame.image.load(img_path).convert_alpha()
+            self.original_img = pygame.transform.scale(self.original_img, (width, height))
         else:
-            self.original_img = pygame.Surface((0, 0))
-        self.width = width or self.original_img.get_width()
-        self.height = height or self.original_img.get_height()
+            if width and height:
+                self.original_img = pygame.Surface((width, height))
+            else:
+                self.original_img = pygame.Surface((0, 0))
+
+        self.width = self.original_img.get_width()
+        self.height = self.original_img.get_height()
 
         # Current image (may be transformed)
-        self.img = pygame.transform.scale(self.original_img, (self.width, self.height))
-        self.original_img = self.img
+        self.img = self.original_img
         self.angle: float = 0
         self.rect = self.img.get_rect()
         self.x, self.y = self.rect.topleft

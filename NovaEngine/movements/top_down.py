@@ -15,7 +15,7 @@ class simpleTopDown:
         self.keys = self.engine.keys_pressed
 
         dx, dy = self._handle_input(self.keys)
-        self._move(dx, dy)
+        self.sprite.move(dx, dy)
         return self
 
     def _handle_input(self, keys):
@@ -29,15 +29,7 @@ class simpleTopDown:
             dy = -self.speed
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             dy = self.speed
-        return dx, dy
-
-    def _move(self, dx, dy):
-        """Moves and resolves collisions."""
-        # Horizontal movement
-        self.rect.x += dx
-
-        # Vertical movement
-        self.rect.y += dy
+        return dx, dy  
 
 
 class TopDownMovement:

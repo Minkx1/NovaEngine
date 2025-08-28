@@ -4,3 +4,5 @@ dist/
 releases/
 .vscode/
 tempCodeRunnerFile.py
+main.cpp
+main.exe

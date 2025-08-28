@@ -131,13 +131,6 @@ class Player(nova.Sprite):
                 self.magazine = MAGAZINE_SIZE
 
         self.draw()
-        self.engine.render_text(
-            f"Coins: {self.money}",
-            self.engine.screen.get_width() - 110,
-            35,
-            center=True,
-            size=20,
-        )
 
 
 # ========================
@@ -154,21 +147,12 @@ SaveManager = nova.SaveManager(Engine)
 Main = nova.Scene(Engine)
 
 with Main.sprites():
-    home_button = nova.Button(
-        Engine, "assets/buttons/Home_Button.png", 50, 50
-    ).place_centered(SCREEN_W - 35, 35)
-
+    # Player
     player = Player(
         Engine, "assets/player.png", width=120, height=103, solids=Main.solids
     ).place_centered(SCREEN_W / 2, SCREEN_H / 2)
 
     bullets = nova.Group()
-    zombies = nova.Group()
-
-    hp_bar = nova.ProgressBar(
-        Engine, 250, 75, 100, player.hp, bg_color=nova.Colors.RED
-    ).set_position(10, SCREEN_H - 85)
-    hp_bar.bind("player.hp")
 
     @player.set_shoot()
     def shoot_bullet():
@@ -184,6 +168,27 @@ with Main.sprites():
             )
             player.magazine -= 1
 
+    # GUI
+
+    hp_bar = nova.ProgressBar(
+        Engine, 250, 75, 100, player.hp, bg_color=nova.Colors.RED
+    ).set_position(10, SCREEN_H - 85)
+    hp_bar.bind("player.hp")
+
+    home_button = nova.Button(
+        Engine, "assets/buttons/Home_Button.png", 50, 50
+    ).place_centered(SCREEN_W - 35, 35)
+    
+    money_text = nova.TextLabel(
+        Engine, Engine.screen.get_width() - 110, 35, text="Coins: ", center=True, size=20
+    ).bind("player.money")
+    magazine_text = nova.TextLabel(
+        Engine, SCREEN_W-70, SCREEN_H-20, text="Round: ", size=30, color=nova.Colors.RED, center=True
+    ).bind("player.magazine")
+
+    # Groups
+    zombies = nova.Group()
+    
 Menu = nova.Scene(Engine)
 
 with Menu.sprites():
@@ -205,15 +210,6 @@ def main_logic():
 
     if home_button.check(): Engine.set_active_scene(Menu)
     if Engine.KeyPressed(pygame.K_ESCAPE): Engine.set_active_scene(Menu)
-
-    Engine.render_text(
-        f"Round: {player.magazine}",
-        SCREEN_W - 70,
-        SCREEN_H - 20,
-        size=30,
-        color=nova.Colors.RED,
-        center=True,
-    )
 
     Main.update()
     

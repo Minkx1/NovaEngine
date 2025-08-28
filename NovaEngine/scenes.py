@@ -22,7 +22,7 @@ class Scene:
         self.engine = engine
         self.objects = []  # all sprites in scene
         self.solids = []  # only solid sprites
-        self.run = None  # main update function
+        self.run = self.update  # main update function
 
         # Register scene in engine
         self.engine.scenes.append(self)
@@ -84,6 +84,4 @@ class Scene:
                 obj.update()
             except Exception as e:
                 from .engine import log
-
-                # print(f"[SceneManager] Error: {e}")
                 log(e, "SceneManager", True)

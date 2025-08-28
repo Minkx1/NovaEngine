@@ -14,7 +14,7 @@ pygame.init()
 # ========================
 # ENGINE CONSTANTS
 # ========================
-ENGINE_VERSION = "V1.6.4"
+ENGINE_VERSION = "V1.7.0"
 APP_NAME_ENGINE_TEMPLATE = f" | Running with NovaEngine {ENGINE_VERSION}"
 
 
@@ -32,6 +32,7 @@ def log(msg: str, sender="NovaEngine", error=False):
         print(f"{prefix} Error: {msg}")
     else:
         print(f"{prefix} {msg}")
+
 
 def get_globals() -> dict:
     """
@@ -217,6 +218,8 @@ class NovaEngine:
         self.fullscreen = False
         self.dt: int = 0
 
+        self.event_handlers = []
+
         # Input states
         self.m_clck = False
         self.mouse_clicked = False
@@ -231,25 +234,30 @@ class NovaEngine:
         # Scene system
         self.scenes = []
         self.active_scene = None
-        self.main_run_func = self.run_active_scene
+        self.main_run_func = None
+
+        @self.main()
+        def _():
+            self.fill_background(Colors.WHITE)
+            self.run_active_scene()
+
         self.globals = None
 
         # Threads
         self.threads = []
-        self.cmd_allow = True
+        self.terminal_allow = True
         self.running = False
 
     # ========================
     # MAIN LOOP
     # ========================
 
-    def run(self, first_scene = None):
+    def run(self, first_scene=None):
         """Run the main game loop and optional command input thread."""
-        self.globals = get_globals()        
+        self.globals = get_globals()
 
         # Start command input thread
-        if self.cmd_allow:
-
+        if self.terminal_allow:
             @self.new_thread()
             def run_cmd_input():
                 while True:
@@ -290,7 +298,9 @@ class NovaEngine:
                 self.main_run_func()
 
             if self.debug:
-                self.render_text(f"{round(self.clock.get_fps(), 2)}", 20, 20)
+                self.render_text(
+                    f"{round(self.clock.get_fps(), 2)}", 20, 20, center=True
+                )
                 self.render_text(
                     str(pygame.mouse.get_pos()),
                     *pygame.mouse.get_pos(),
@@ -308,11 +318,11 @@ class NovaEngine:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.quit()
+                for handler in self.event_handlers:
+                    handler.handle_event(event)
 
             pygame.display.flip()
-            self.dt = (
-                self.clock.tick(self.fps) / 1000
-            )  # getting time passed after each frame
+            self.dt = self.clock.tick(self.fps) / 1000
 
     def quit(self):
         """Stop engine and exit program."""
@@ -340,7 +350,7 @@ class NovaEngine:
 
         return decorator
 
-    def set_debug(self, value=False):
+    def set_debug(self, value=True):
         """Enable or disable debug rendering (FPS, mouse pos)."""
         self.debug = value
         return self
@@ -358,7 +368,8 @@ class NovaEngine:
 
     def run_active_scene(self):
         """Run the currently active scene."""
-        if self.active_scene: self.active_scene.run()
+        if self.active_scene:
+            self.active_scene.run()
 
     def set_active_scene(self, scene):
         """Set active scene without running it immediately."""
@@ -484,5 +495,10 @@ class NovaEngine:
             self._text_cache[cache_key] = text_surf
 
         rect = text_surf.get_rect()
-        rect.center = (x, y) if center else (x, y)
+        if center:
+            rect.center = (x, y)
+        else:
+            rect.topleft = (x, y)
+
         self.screen.blit(text_surf, rect)
+        return rect

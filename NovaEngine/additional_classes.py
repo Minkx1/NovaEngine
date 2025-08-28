@@ -1,23 +1,7 @@
+"""===== additional_classes.py ====="""
+
 import pygame
 from .sprite import Sprite
-from .engine import log
-
-class Button(Sprite):
-    def __init__(self, engine, img_path, width=None, height=None):
-        super().__init__(engine, img_path, width=width, height=height)
-
-    def check(self):
-        """Draw button and return True if it was just pressed."""
-        self.draw()
-
-        clicked = False
-        mouse_pos = pygame.mouse.get_pos()
-
-        if self.rect.collidepoint(mouse_pos):
-            clicked = self.engine.MouseClicked()
-
-        return clicked
-
 
 class ProgressBar(Sprite):
     def __init__(
@@ -124,12 +108,12 @@ class Projectile(Sprite):
             sx, sy = start[0],start[1] 
             self.place_centered(sx, sy)
         except Exception as e:
-            log(e, error=True)
+            print(f"[NovaEngine] Error: {e}")
 
         try:
             self.look_at(pygame.mouse.get_pos())
         except Exception as e:
-            log(e, error=True)
+            print(f"[NovaEngine] Error: {e}")
     
     def update(self):
         if not self.collide(rect=self.engine.screen.get_rect()): 
