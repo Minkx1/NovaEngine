@@ -3,6 +3,7 @@
 import pygame
 from .sprite import Sprite
 
+
 class ProgressBar(Sprite):
     def __init__(
         self,
@@ -45,9 +46,10 @@ class ProgressBar(Sprite):
     def add_value(self, delta):
         """Додати/відняти значення"""
         self.set_value(self.value + delta)
-    
+
     def bind(self, var: str):
         from .engine import get_globals
+
         GLOBALS = get_globals()
 
         parts = var.split(".")
@@ -90,22 +92,32 @@ class ProgressBar(Sprite):
                 self.rect.centery,
                 center=True,
             )
-    
+
     def update(self):
         # if bound
         if self.bound_obj and self.bound_attr:
             self.value = getattr(self.bound_obj, self.bound_attr)
         self.draw()
 
+
 class Projectile(Sprite):
-    def __init__(self, engine, img_path, width=None, height=None, start = None, target = None, speed:int = 100):
+    def __init__(
+        self,
+        engine,
+        img_path,
+        width=None,
+        height=None,
+        start=None,
+        target=None,
+        speed: int = 100,
+    ):
         super().__init__(engine, img_path, width, height)
         self.start = start
         self.target = target
         self.speed = speed
 
         try:
-            sx, sy = start[0],start[1] 
+            sx, sy = start[0], start[1]
             self.place_centered(sx, sy)
         except Exception as e:
             print(f"[NovaEngine] Error: {e}")
@@ -114,9 +126,14 @@ class Projectile(Sprite):
             self.look_at(pygame.mouse.get_pos())
         except Exception as e:
             print(f"[NovaEngine] Error: {e}")
-    
+
     def update(self):
-        if not self.collide(rect=self.engine.screen.get_rect()): 
+        if not self.collide(rect=self.engine.screen.get_rect()):
             self.kill()
         self.draw()
         self.move_angle(50)
+
+
+class Dummy(Sprite):
+    def __init__(self, engine):
+        super().__init__(engine, img_path=None, width=0, height=0, solid=False)

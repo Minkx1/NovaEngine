@@ -3,6 +3,7 @@
 import pygame
 from .sprite import Sprite
 
+
 class Button(Sprite):
     def __init__(self, engine, img_path, width=None, height=None):
         super().__init__(engine, img_path, width=width, height=height)
@@ -19,8 +20,11 @@ class Button(Sprite):
 
         return clicked
 
+
 class ToggleButton(Button):
-    def __init__(self, engine, img_path = [str, str], width=None, height=None, start_state=False):
+    def __init__(
+        self, engine, img_path=[str, str], width=None, height=None, start_state=False
+    ):
         super().__init__(engine, img_path, width, height)
         self.state = start_state
         self.img_0, self.img_1 = img_path[0], img_path[0]
@@ -28,9 +32,9 @@ class ToggleButton(Button):
     def draw(self):
         if not self.state:
             self.img = self.img_0
-        else: 
+        else:
             self.img = self.img_1
-        
+
         super().draw()
         return self
 
@@ -51,8 +55,19 @@ class ToggleButton(Button):
             self.state = not self.state
         return self.state
 
+
 class TextLabel(Sprite):
-    def __init__(self, engine, x, y, text="", font="TimesNewRoman", size=16, color=(0,0,0), center=False):
+    def __init__(
+        self,
+        engine,
+        x,
+        y,
+        text="",
+        font="TimesNewRoman",
+        size=16,
+        color=(0, 0, 0),
+        center=False,
+    ):
         super().__init__(engine, None)
         self.x = x
         self.y = y
@@ -71,6 +86,7 @@ class TextLabel(Sprite):
 
     def bind(self, var: str):
         from .engine import get_globals
+
         GLOBALS = get_globals()
 
         parts = var.split(".")
@@ -86,17 +102,38 @@ class TextLabel(Sprite):
         return self
 
     def draw(self):
-        self.engine.render_text(self.render_text, self.x, self.y, self.font, self.size, self.color, self.center)
+        self.engine.render_text(
+            self.render_text,
+            self.x,
+            self.y,
+            self.font,
+            self.size,
+            self.color,
+            self.center,
+        )
 
     def update(self):
         # if bound
         if self.bound_obj and self.bound_attr:
             self.render_text = self.text + str(getattr(self.bound_obj, self.bound_attr))
-        self.draw() 
+        self.draw()
+
 
 class TextInput(Sprite):
     """Поле для введення тексту, як в Tkinter Entry."""
-    def __init__(self, engine, x, y, width=200, height=30, font="TimesNewRoman", size=16, color=(0,0,0), bg_color=(255,255,255)):
+
+    def __init__(
+        self,
+        engine,
+        x,
+        y,
+        width=200,
+        height=30,
+        font="TimesNewRoman",
+        size=16,
+        color=(0, 0, 0),
+        bg_color=(255, 255, 255),
+    ):
         super().__init__(engine, None, width, height)
         self.x = x
         self.y = y
@@ -124,16 +161,38 @@ class TextInput(Sprite):
 
     def draw(self):
         # фон
-        pygame.draw.rect(self.surface, self.bg_color, (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(
+            self.surface, self.bg_color, (self.x, self.y, self.width, self.height)
+        )
         # текст
-        text_rect = self.engine.render_text(self.current_input, self.x + 5, self.y + self.height // 2, self.font, self.size, self.color)
+        text_rect = self.engine.render_text(
+            self.current_input,
+            self.x + 5,
+            self.y + self.height // 2,
+            self.font,
+            self.size,
+            self.color,
+        )
         return text_rect
-    
+
     def update(self):
         self.draw()
 
+
 class CheckBox(Sprite):
-    def __init__(self, engine, x, y, width=20, height=20, text="", font="TimesNewRoman", size=16, color=(0,0,0), state=False):
+    def __init__(
+        self,
+        engine,
+        x,
+        y,
+        width=20,
+        height=20,
+        text="",
+        font="TimesNewRoman",
+        size=16,
+        color=(0, 0, 0),
+        state=False,
+    ):
         super().__init__(engine, None, width, height)
         self.x, self.y = x, y
         self.rect.x, self.rect.y = x, y
@@ -149,13 +208,22 @@ class CheckBox(Sprite):
         return self.state
 
     def draw(self):
-        pygame.draw.rect(self.surface, (0,0,0), self.rect, 2)
+        pygame.draw.rect(self.surface, (0, 0, 0), self.rect, 2)
         if self.state:
-            pygame.draw.line(self.surface, (0,0,0), self.rect.topleft, self.rect.bottomright, 2)
-            pygame.draw.line(self.surface, (0,0,0), (self.x+self.width, self.y), (self.x, self.y+self.height), 2)
-        self.engine.render_text(self.text, self.x+30, self.y, self.font, self.size, self.color)
-    
+            pygame.draw.line(
+                self.surface, (0, 0, 0), self.rect.topleft, self.rect.bottomright, 2
+            )
+            pygame.draw.line(
+                self.surface,
+                (0, 0, 0),
+                (self.x + self.width, self.y),
+                (self.x, self.y + self.height),
+                2,
+            )
+        self.engine.render_text(
+            self.text, self.x + 30, self.y, self.font, self.size, self.color
+        )
+
     def update(self):
         self.check()
         self.draw()
-        

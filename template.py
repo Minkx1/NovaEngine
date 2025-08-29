@@ -9,7 +9,7 @@ import pygame, math, random
 import NovaEngine as nova
 
 SCREEN = (900, 600)
-SCREEN_W, SCREEN_H = SCREEN[0],SCREEN[1]
+SCREEN_W, SCREEN_H = SCREEN[0], SCREEN[1]
 MAGAZINE_SIZE = 10
 
 
@@ -163,7 +163,8 @@ with Main.sprites():
                     "assets/bullet.png",
                     player.rect.centerx,
                     player.rect.centery,
-                    8,8
+                    8,
+                    8,
                 )
             )
             player.magazine -= 1
@@ -178,17 +179,28 @@ with Main.sprites():
     home_button = nova.Button(
         Engine, "assets/buttons/Home_Button.png", 50, 50
     ).place_centered(SCREEN_W - 35, 35)
-    
+
     money_text = nova.TextLabel(
-        Engine, Engine.screen.get_width() - 110, 35, text="Coins: ", center=True, size=20
+        Engine,
+        Engine.screen.get_width() - 110,
+        35,
+        text="Coins: ",
+        center=True,
+        size=20,
     ).bind("player.money")
     magazine_text = nova.TextLabel(
-        Engine, SCREEN_W-70, SCREEN_H-20, text="Round: ", size=30, color=nova.Colors.RED, center=True
+        Engine,
+        SCREEN_W - 70,
+        SCREEN_H - 20,
+        text="Round: ",
+        size=30,
+        color=nova.Colors.RED,
+        center=True,
     ).bind("player.magazine")
 
     # Groups
     zombies = nova.Group()
-    
+
 Menu = nova.Scene(Engine)
 
 with Menu.sprites():
@@ -204,42 +216,53 @@ with Menu.sprites():
 # 3. Scenes logic
 # ========================
 
+
 @Main.function()
 def main_logic():
     Engine.fill_background(nova.Colors.WHITE)
 
-    if home_button.check(): Engine.set_active_scene(Menu)
-    if Engine.KeyPressed(pygame.K_ESCAPE): Engine.set_active_scene(Menu)
+    if home_button.check():
+        Engine.set_active_scene(Menu)
+    if Engine.KeyPressed(pygame.K_ESCAPE):
+        Engine.set_active_scene(Menu)
 
     Main.update()
-    
+
+
 @Menu.function()
 def menu_logic():
     Engine.fill_background(image=bg)
 
-    if quit_button.check(): Engine.quit()
-    if play_button.check(): Engine.set_active_scene(Main)
+    if quit_button.check():
+        Engine.quit()
+    if play_button.check():
+        Engine.set_active_scene(Main)
+
 
 # ========================
 # 4. Run Engine
 # ========================
+
 
 @Engine.Interval(10, 1)
 def zombie_spawn():
     side = random.choice(["left", "right", "top", "bottom"])
 
     if side == "left":
-        x, y = -50, random.randint(0, SCREEN_H)   
+        x, y = -50, random.randint(0, SCREEN_H)
     elif side == "right":
         x, y = SCREEN_W + 50, random.randint(0, SCREEN_H)
     elif side == "top":
         x, y = random.randint(0, SCREEN_W), -50
-    else: 
+    else:
         x, y = random.randint(0, SCREEN_W), SCREEN_H + 50
 
     zombies.add(
-        Zombie(Engine,"assets/zombie.png",106,98,target=player,killers=bullets).place_centered(x, y)
+        Zombie(
+            Engine, "assets/zombie.png", 106, 98, target=player, killers=bullets
+        ).place_centered(x, y)
     )
+
 
 Engine.run(Menu)
 

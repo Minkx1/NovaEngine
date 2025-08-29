@@ -1,6 +1,7 @@
-""" ===== sound.py ===== """
+"""===== sound.py ====="""
 
 import pygame
+
 
 class SoundManager:
     def __init__(self):
@@ -20,6 +21,7 @@ class SoundManager:
             snd.play(count)
         else:
             from .engine import log
+
             log(f"Sound '{name}' not found", "SoundManager", True)
 
     def play_music(self, path, volume=1.0, loop=-1):

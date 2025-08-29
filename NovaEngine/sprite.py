@@ -12,7 +12,14 @@ class Sprite:
     - animation handling
     """
 
-    def __init__(self, engine, img_path: str, width: float = None, height: float = None, solid: bool = False):
+    def __init__(
+        self,
+        engine,
+        img_path: str,
+        width: float = None,
+        height: float = None,
+        solid: bool = False,
+    ):
         self.engine = engine
         self.surface = self.engine.screen
         self.solid = solid
@@ -30,7 +37,9 @@ class Sprite:
         # Load original image (keep for transformations)
         if img_path:
             self.original_img = pygame.image.load(img_path).convert_alpha()
-            self.original_img = pygame.transform.scale(self.original_img, (width, height))
+            self.original_img = pygame.transform.scale(
+                self.original_img, (width, height)
+            )
         else:
             if width and height:
                 self.original_img = pygame.Surface((width, height))
@@ -76,12 +85,14 @@ class Sprite:
 
         return decorator
 
-    def set_position(self, x:float = None, y:float = None):
+    def set_position(self, x: float = None, y: float = None):
         """Set top-left position of the sprite."""
-        if (x or y):
-            if not x: self.y = y
-            if not y: self.x = x
-        self.rect.topleft = (self.x, self.y) 
+        if x or y:
+            if not x:
+                self.y = y
+            if not y:
+                self.x = x
+        self.rect.topleft = (self.x, self.y)
         return self
 
     def place_centered(self, x, y):
@@ -121,11 +132,11 @@ class Sprite:
             # moveing sprite
             self.rect.x += dx * speed * self.engine.dt
             self.rect.y += dy * speed * self.engine.dt
-    
+
     def move_angle(self, speed):
         ang = self.angle + 90
-        dx = math.sin(math.radians(ang))*speed
-        dy = math.cos(math.radians(ang))*speed
+        dx = math.sin(math.radians(ang)) * speed
+        dy = math.cos(math.radians(ang)) * speed
         self.move(dx, dy)
 
     def scale(self, width, height):
@@ -134,8 +145,8 @@ class Sprite:
         self.rect = self.img.get_rect(center=self.rect.center)
         self.x, self.y = self.rect.topleft
         return self
-    
-    def stay_in_rect(self, rect : pygame.rect.Rect):
+
+    def stay_in_rect(self, rect: pygame.rect.Rect):
         self.rect.clamp_ip(rect)
         return self
 

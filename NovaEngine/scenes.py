@@ -84,4 +84,5 @@ class Scene:
                 obj.update()
             except Exception as e:
                 from .engine import log
+
                 log(e, "SceneManager", True)

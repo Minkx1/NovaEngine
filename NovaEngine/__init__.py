@@ -1,6 +1,6 @@
 from .engine import NovaEngine, Colors, DevTools, log
 from .sprite import Sprite, Group
-from .additional_classes import *
+from .sprite_like import *
 from .gui import *
 from .scenes import Scene
 from .sound import SoundManager

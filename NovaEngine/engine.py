@@ -258,6 +258,7 @@ class NovaEngine:
 
         # Start command input thread
         if self.terminal_allow:
+
             @self.new_thread()
             def run_cmd_input():
                 while True:
@@ -268,7 +269,7 @@ class NovaEngine:
                     elif cmd == "restart()":
                         subprocess.Popen(
                             [sys.executable] + sys.argv,
-                            creationflags=subprocess.CREATE_NEW_CONSOLE  # new console
+                            creationflags=subprocess.CREATE_NEW_CONSOLE,  # new console
                         )
                         self.quit()
                         break
@@ -285,7 +286,7 @@ class NovaEngine:
                 self.set_active_scene(first_scene)
             except Exception as e:
                 log(f"{e}", "SceneManager", True)
-        
+
         if not self.active_scene and self.scenes:
             self.active_scene = self.scenes[0]
 
@@ -358,6 +359,7 @@ class NovaEngine:
     # ========================
     # SCENE MANAGEMENT
     # ========================
+
     def run_scene(self, scene):
         """Run a specific registered scene."""
         if scene in self.scenes:
@@ -378,6 +380,7 @@ class NovaEngine:
     # ========================
     # INPUT MANAGEMENT
     # ========================
+
     def MouseClicked(self, button=0, first_iter=False):
         """Return True only on first mouse click (not hold)."""
         if not first_iter:
@@ -417,6 +420,7 @@ class NovaEngine:
     # ========================
     # TIME MANAGEMENT
     # ========================
+
     def Timer(self, duration):
         """Decorator to run function after duration seconds."""
 
@@ -460,6 +464,7 @@ class NovaEngine:
     # ========================
     # UTILITIES
     # ========================
+
     def fill_background(
         self,
         color: Union[Colors, Tuple[int, int, int]] = Colors.BLACK,
