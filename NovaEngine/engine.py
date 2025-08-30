@@ -329,7 +329,6 @@ class NovaEngine:
         """Stop engine and exit program."""
         self.running = False
         log("Quitting the game...")
-        sys.exit()
 
     def main(self):
         """Decorator to register main game logic."""
@@ -422,7 +421,7 @@ class NovaEngine:
     # ========================
 
     def Timer(self, duration):
-        """Decorator to run function after duration seconds."""
+        """Decorator to run function after $duration$ seconds."""
 
         def decorator(func):
             threading.Timer(duration, func).start()

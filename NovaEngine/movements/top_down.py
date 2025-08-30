@@ -16,6 +16,7 @@ class simpleTopDown:
 
         dx, dy = self._handle_input(self.keys)
         self.sprite.move(dx, dy)
+        self.sprite.stay_in_rect(self.engine.screen.get_rect())
         return self
 
     def _handle_input(self, keys):

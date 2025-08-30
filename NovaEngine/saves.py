@@ -4,7 +4,6 @@ import json, os
 from pathlib import Path
 import inspect
 
-
 class SaveManager:
     """
     A manager class for saving and loading object attributes to JSON.
@@ -16,7 +15,7 @@ class SaveManager:
         save_manager.load()
     """
 
-    def __init__(self, engine, appdata: bool = True):
+    def __init__(self, engine, appdata: bool = True, path:str = None, name:str = "data"):
         """
         Initialize SaveManager.
 
@@ -24,25 +23,37 @@ class SaveManager:
             engine: Reference to the game engine (used for app_name).
             appdata (bool): If True, saves data in OS-specific appdata folder.
                             If False, saves in current working directory.
+            path (str): If $appdata$ is False, SaveManager will create folder with saves in $path$ directory. 
+                  If $appdata$ is True, then in AppData folder will be created $path$.
+            name (str): the name of save file.
+
         """
         self.engine = engine
-        app_name = self.engine.app_name
+        self.path = path
+        self.name = name
+
+        if self.path is None: 
+            self.path = self.engine.app_name
 
         # Choose directory depending on OS
         if appdata:
             if os.name == "nt":  # Windows
-                app_data_path = os.getenv("APPDATA")
-                self.main_dir = os.path.join(app_data_path, app_name)
+                self.app_data_path = os.getenv("APPDATA")
+                self.main_dir = os.path.join(self.app_data_path, path)
             else:  # Linux / macOS
-                self.main_dir = os.path.join(Path.home(), f".{app_name}")
+                self.main_dir = os.path.join(Path.home(), f".{self.path}")
         else:
-            self.main_dir = os.path.join(os.getcwd(), app_name)
+            self.main_dir = self.path
 
         os.makedirs(self.main_dir, exist_ok=True)
-        self.data_file = os.path.join(self.main_dir, "data.json")
+        
+        if self.name:
+            self.data_file = os.path.join(self.main_dir, f"{name}.novasave")
+        else:
+            self.data_file = os.path.join(self.main_dir, "data.json")
 
         self.vars: list[str] = []
-
+    
     def _get_globals(self) -> dict:
         """
         Get the caller's global variables.

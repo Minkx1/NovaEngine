@@ -186,10 +186,10 @@ class Sprite:
     def update(self):
         """Call custom update function or draw by default."""
         if self.alive:
+            self.draw()
             if self.update_func:
                 self.update_func()
-            else:
-                self.draw()
+                
 
     # ====== ANIMATIONS ======
     def set_animation(self, name, frames, speed=0.1, loop=True):
