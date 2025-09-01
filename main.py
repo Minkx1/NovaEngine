@@ -4,7 +4,7 @@ SCREEN_W, SCREEN_H = 900, 650
 GUIPANEL_H = 50
 PLAYER_SPD = 5
 
-Engine = nova.NovaEngine((SCREEN_W, SCREEN_H), "TestGame", "assets/hero.png").set_debug(True)
+Engine = nova.NovaEngine((SCREEN_W, SCREEN_H), "TestGame", "assets/hero.png").set_debug(False)
 saves = nova.SaveManager(Engine, path="ZombieKillerGame", name="data")
 
 class Player(nova.Sprite):
@@ -16,6 +16,7 @@ class Player(nova.Sprite):
         self.money = 0
         self.max_magazine = 10
         self.magazine = self.max_magazine
+        self.player_alive = True
 
         self.projectiles = nova.Group()
 
@@ -41,6 +42,9 @@ class Player(nova.Sprite):
         
         if self.engine.KeyPressed(pygame.K_r):
             self.reload()
+        
+        if player.hp <= 0:
+            self.player_alive = False
 
     def shoot(self):
         if self.magazine > 0:
@@ -75,6 +79,9 @@ class Zombie(nova.Sprite):
         self.target = target
         self.killers = killers
 
+        nova.Sprite -= 1
+        self.count = 0
+
     def update(self):
         if self.alive:
             self.look_at(self.target)
@@ -99,28 +106,84 @@ class Zombie(nova.Sprite):
 # Main Scene
 Main = nova.Scene(Engine)
 with Main.sprites():
+    Engine.record_time = 0
+    Engine.player_alive = True
+
     main_bg_img = nova.Sprite.CreateImage("assets/main_bg.png", SCREEN_W, SCREEN_H)
+    panel = nova.Rect(Engine, rect=(0, 0, SCREEN_W, GUIPANEL_H))
 
     player = Player(Engine, "assets/player.png", 120, 120).place_centered(SCREEN_W / 2, SCREEN_H / 2)
     zombies = nova.Group()
+    zombie_cd = Engine.create_cooldown(2)
+    def zombie_spawn():
+        side = random.choice(["left", "right", "top", "bottom"])
 
+        if side == "left":
+            x, y = -50, random.randint(0, SCREEN_H)   
+        elif side == "right":
+            x, y = SCREEN_W + 50, random.randint(0, SCREEN_H)
+        elif side == "top":
+            x, y = random.randint(0, SCREEN_W), -50
+        else: 
+            x, y = random.randint(0, SCREEN_W), SCREEN_H + 50
+
+        zombies.add(
+            Zombie(Engine,"assets/zombie.png",106,98,target=player,killers=player.projectiles).place_centered(x, y)
+        )
+    
     hp_bar = nova.ProgressBar(Engine, 300, 50, 100, 100, (200, 0, 0)).bind("player.hp")
     money_text = nova.TextLabel(Engine, 390, 25, "Money: $",size=24, color=nova.Colors.WHITE, center=True).bind('player.money')
     magazine_text = nova.TextLabel(Engine, 540, 25, text="  |  Magazine: ", size = 24, color=nova.Colors.WHITE, center=True).bind("player.magazine")
-        
+    time_text = nova.TextLabel(Engine, 690, 25, " |  Time: ", size=24, color=nova.Colors.WHITE, center=True).bind("Engine.time")
+    @time_text.modify_value()
+    def _(var):
+        sec = var//1000
+        return f" {sec//60} : {sec%60}"
+
 @Main.function()    
 def _():
-    # Engine.fill_background(image=main_bg_img)
-    pygame.draw.rect(Engine.screen, nova.Colors.BLACK, (0, 0, SCREEN_W, GUIPANEL_H))
+    Engine.fill_background(color=nova.Colors.WHITE)#image=main_bg_img)
 
-    if Engine.KeyPressed(pygame.K_ESCAPE): Engine.set_active_scene(Menu)
+    if Engine.KeyPressed(pygame.K_ESCAPE): Engine.set_active_scene(Pause)
+    if zombie_cd.check():
+        zombie_spawn()
+        zombie_cd.start()
     
+    if not player.player_alive:
+        Engine.set_active_scene(Menu)
+
     Main.update() 
+
+# Pause Scene
+Pause = nova.Scene(Engine)
+with Pause.sprites():
+    txt1 = nova.TextLabel(Engine, SCREEN_W/2, 150, "G A M E       P A U S E D",size=32, color=nova.Colors.WHITE, center=True)
+    resume_btn = nova.Button(Engine, "assets/Buttons/Resume_Button.png", 300, 100).place_centered(SCREEN_W/2, 250)
+    menu_btn = nova.Button(Engine, "assets/Buttons/Menu_Button.png", 300, 100).place_centered(SCREEN_W/2, 400)
+
+@Pause.function()
+def _():
+    Engine.time_freeze()
+    Engine.fill_background(nova.Colors.BLACK)
+    
+    if resume_btn.check():
+        Engine.time_unfreeze()
+        Engine.set_active_scene(Main)
+    if menu_btn.check():
+        Engine.set_active_scene(Menu)
+
+    Pause.update()
 
 # Menu Scene
 Menu = nova.Scene(Engine)
 with Menu.sprites():
     menu_bg_img = nova.Sprite.CreateImage("assets/menu_bg.png", SCREEN_W, SCREEN_H)
+
+    record_text = nova.TextLabel(Engine, SCREEN_W/2, 50, "RECORD TIME - ", size=36, color=nova.Colors.WHITE, center=True).bind("Engine.record_time")
+    @record_text.modify_value()
+    def _(val: int) -> str:
+        sec = val//1000
+        return f"{sec//60} : {sec%60}"
 
     play_btn = nova.Button(Engine, "assets/Buttons/Play_Button.png", 300, 100).place_centered(SCREEN_W/2, 160)
     options_btn = nova.Button(Engine, "assets/Buttons/Options_Button.png", 300, 100).place_centered(SCREEN_W/2, 280)
@@ -128,35 +191,26 @@ with Menu.sprites():
 
 @Menu.function()
 def _():
+    Engine.time_freeze()
     Engine.fill_background(image=menu_bg_img)
     
-    if play_btn.check(): Engine.set_active_scene(Main)
+    if play_btn.check(): 
+        Engine.set_active_scene(Main)
+        Engine.time_unfreeze()
     if quit_btn.check(): Engine.quit()
 
     Menu.update()
 
-# Main Game Cycle
-@Engine.Interval(10, 1)
-def zombie_spawn():
-    side = random.choice(["left", "right", "top", "bottom"])
+@Engine.main()
+def main():
+    Engine.run_active_scene()
+    Engine.time
+    Engine.record_time = max(Engine.time, Engine.record_time)
 
-    if side == "left":
-        x, y = -50, random.randint(0, SCREEN_H)   
-    elif side == "right":
-        x, y = SCREEN_W + 50, random.randint(0, SCREEN_H)
-    elif side == "top":
-        x, y = random.randint(0, SCREEN_W), -50
-    else: 
-        x, y = random.randint(0, SCREEN_W), SCREEN_H + 50
-
-    zombies.add(
-        Zombie(Engine,"assets/zombie.png",106,98,target=player,killers=player.projectiles).place_centered(x, y)
-    )
-
-saves.set_vars(["player.money"])
+saves.set_vars(["player.money", "Engine.record_time"])
 
 saves.load()
 
-Engine.run(Main)
+Engine.run(Menu)
 
 saves.save()

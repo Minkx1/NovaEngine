@@ -80,6 +80,9 @@ class TextLabel(Sprite):
 
         self.bound_obj = None
         self.bound_attr = None
+        self.bind_var = None
+
+        self.decoration_func = None
 
     def set_text(self, new_text):
         self.text = new_text
@@ -112,10 +115,25 @@ class TextLabel(Sprite):
             self.center,
         )
 
+    def modify_value(self):
+        def decorator(func):
+            self.decoration_func = func
+            return func
+        return decorator
+
     def update(self):
         # if bound
+        
         if self.bound_obj and self.bound_attr:
-            self.render_text = self.text + str(getattr(self.bound_obj, self.bound_attr))
+            self.bind_var = getattr(self.bound_obj, self.bound_attr)
+
+        if self.decoration_func:
+            self.render_text = self.text + str(self.decoration_func(self.bind_var))
+        else:
+            if self.bind_var:
+                self.render_text = self.text + str(self.bind_var)
+            else:
+                self.render_text = self.text
         self.draw()
 
 

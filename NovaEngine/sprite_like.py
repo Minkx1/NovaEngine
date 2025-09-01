@@ -137,3 +137,16 @@ class Projectile(Sprite):
 class Dummy(Sprite):
     def __init__(self, engine):
         super().__init__(engine, img_path=None, width=0, height=0, solid=False)
+
+
+class Rect(Sprite):
+
+    def __init__(self, engine, color=(0,0,0), border=0, rect=(0,0,0,0), solid = False):
+        super().__init__(engine, None, width=0, height=0, solid=solid)
+
+        self.color = color
+        self.border = border
+        self.rect = rect
+    
+    def update(self):
+        pygame.draw.rect(self.engine.screen, self.color, self.rect, self.border)

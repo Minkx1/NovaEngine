@@ -12,6 +12,8 @@ class Sprite:
     - animation handling
     """
 
+    _counter = 0 # var for counting sprites and drawing them in order, that they are initialized
+
     def __init__(
         self,
         engine,
@@ -33,6 +35,8 @@ class Sprite:
             random.randint(0, 255),
         )
         self.debug = engine.debug
+        self.count = Sprite._counter + 1
+        Sprite._counter +=1
 
         # Load original image (keep for transformations)
         if img_path:
@@ -261,6 +265,8 @@ class Group:
 
     def __init__(self, *sprites):
         self.sprites = list(sprites)
+        self.count = Sprite._counter + 1
+        Sprite._counter =+ 1
 
     def add(self, *sprites):
         for sprite in sprites:

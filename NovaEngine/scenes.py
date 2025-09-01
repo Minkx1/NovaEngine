@@ -64,6 +64,9 @@ class Scene:
                 self.objects.append(obj)
                 if getattr(obj, "solid", False):
                     self.solids.append(obj)
+        
+        self.objects.sort(key=lambda o: getattr(o, "count", 0))
+        self.solids.sort(key=lambda o: getattr(o, "count", 0))
 
     # ========================
     # SCENE LOOP

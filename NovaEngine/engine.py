@@ -178,6 +178,9 @@ class Colors:
     BLUE = (0, 0, 255)
 
 
+# ========================
+# MAIN INSTANCE CLASS
+# ========================
 class NovaEngine:
     """
     Lightweight PyGame framework for:
@@ -213,6 +216,10 @@ class NovaEngine:
 
         self.clock = pygame.time.Clock()
         self.fps = fps
+        self.time = 0
+        self.time_spent_frozed = 0
+        self.time_froze = False
+
         self.debug = False
         self.enable_fullscreen = enable_fullscreen
         self.fullscreen = False
@@ -228,7 +235,7 @@ class NovaEngine:
 
         # Internal caches
         self._text_cache = {}
-        self.cooldowns = {}
+        self.cooldowns = []
         self.intervals = []
 
         # Scene system
@@ -285,7 +292,7 @@ class NovaEngine:
             try:
                 self.set_active_scene(first_scene)
             except Exception as e:
-                log(f"{e}", "SceneManager", True)
+                log(f"{e}", error=True)
 
         if not self.active_scene and self.scenes:
             self.active_scene = self.scenes[0]
@@ -294,6 +301,7 @@ class NovaEngine:
         while self.running:
             self.keys_pressed = pygame.key.get_pressed()
             self.mouse_clicked = self.MouseClicked(first_iter=True)
+            if not self.time_froze : self.time = pygame.time.get_ticks() - self.time_spent_frozed
 
             if self.main_run_func:
                 self.main_run_func()
@@ -420,6 +428,14 @@ class NovaEngine:
     # TIME MANAGEMENT
     # ========================
 
+    def time_freeze(self):
+        self.time_froze = True
+        self.previous_time = self.time
+    
+    def time_unfreeze(self):
+        self.time_froze = False
+        self.time_spent_frozed = (pygame.time.get_ticks() - self.previous_time)
+
     def Timer(self, duration):
         """Decorator to run function after $duration$ seconds."""
 
@@ -428,19 +444,31 @@ class NovaEngine:
             return func
 
         return decorator
-
-    def Cooldown(self, key, duration, start=False):
+    
+    class Cooldown():
         """Check or create a cooldown for a key."""
-        if start:
+        def __init__(self,engine, duration):
+            self.engine = engine
+            self.duration = duration*1000
+            self.state = True
+            self.start_time = 0
 
-            @self.new_thread()
-            def _():
-                self.cooldowns[key] = False
-                time.sleep(duration)
-                self.cooldowns[key] = True
+            self.engine.cooldowns.append(self)
 
-        return self.cooldowns.get(key, True)
-
+        def check(self):
+            # Checks if coolodown is ready
+            self.now = self.engine.time
+            self.state = self.now - self.start_time >= self.duration
+            return self.state
+        
+        def start(self):
+            # Called one time and starts cooldown
+            self.start_time = self.engine.time
+            self.state = False
+    
+    def create_cooldown(self, duration):
+        return NovaEngine.Cooldown(self, duration)
+        
     def Interval(self, count, cooldown):
         """Call function `count` times with delay `cooldown` seconds (use -1 for infinite)."""
 
