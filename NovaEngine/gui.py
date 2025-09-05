@@ -123,18 +123,19 @@ class TextLabel(Sprite):
 
     def update(self):
         # if bound
-        
-        if self.bound_obj and self.bound_attr:
-            self.bind_var = getattr(self.bound_obj, self.bound_attr)
+        if self.alive:
+            if self.bound_obj and self.bound_attr:
+                self.bind_var = getattr(self.bound_obj, self.bound_attr)
 
-        if self.decoration_func:
-            self.render_text = self.text + str(self.decoration_func(self.bind_var))
-        else:
-            if self.bind_var:
-                self.render_text = self.text + str(self.bind_var)
+            if self.decoration_func:
+                self.render_text = self.text + str(self.decoration_func(self.bind_var))
             else:
-                self.render_text = self.text
-        self.draw()
+                if self.bind_var:
+                    self.render_text = self.text + str(self.bind_var)
+                else:
+                    self.render_text = self.text
+            
+            self.draw()
 
 
 class TextInput(Sprite):

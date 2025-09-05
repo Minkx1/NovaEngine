@@ -6,3 +6,4 @@ releases/
 tempCodeRunnerFile.py
 main.cpp
 main.exe
+*.spec

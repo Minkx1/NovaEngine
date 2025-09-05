@@ -18,7 +18,7 @@ class SoundManager:
         if name in self.sounds:
             snd = self.sounds[name]
             snd.set_volume(volume)
-            snd.play(count)
+            snd.play(count-1)
         else:
             from .engine import log
 

@@ -2,7 +2,7 @@
 
 import pygame
 from .sprite import Sprite
-
+from .gui import TextLabel
 
 class ProgressBar(Sprite):
     def __init__(
@@ -42,27 +42,14 @@ class ProgressBar(Sprite):
     def set_value(self, value):
         """Встановити значення прогрес-бара"""
         self.value = max(0, min(self.max_value, value))
+    
+    def set_max_value(self, max_value):
+        """Встановити максимальне значення прогрес-бара"""
+        self.max_value = max_value
 
     def add_value(self, delta):
         """Додати/відняти значення"""
         self.set_value(self.value + delta)
-
-    def bind(self, var: str):
-        from .engine import get_globals
-
-        GLOBALS = get_globals()
-
-        parts = var.split(".")
-        obj_name = parts[0]
-        attr_name = parts[1]
-
-        obj = GLOBALS.get(obj_name)
-        if obj is None:
-            raise ValueError(f"Object '{obj_name}' not found in main globals")
-
-        self.bound_obj = obj
-        self.bound_attr = attr_name
-        return self
 
     def draw(self):
         """Draws progress-bar on the screen"""
@@ -90,14 +77,8 @@ class ProgressBar(Sprite):
                 f"{self.value} / {self.max_value}",
                 self.rect.centerx,
                 self.rect.centery,
-                center=True,
+                center=True
             )
-
-    def update(self):
-        # if bound
-        if self.bound_obj and self.bound_attr:
-            self.value = getattr(self.bound_obj, self.bound_attr)
-        self.draw()
 
 
 class Projectile(Sprite):
@@ -150,3 +131,16 @@ class Rect(Sprite):
     
     def update(self):
         pygame.draw.rect(self.engine.screen, self.color, self.rect, self.border)
+
+class Popup(TextLabel):
+    def __init__(self, engine, x, y, text="", time=3, font="TimesNewRoman", size=16, color=(0,0,0), center=True):
+        super().__init__(engine, x, y, text, font, size, color, center)
+
+        self.time = time
+        self.cd = self.engine.create_cooldown(self.time)
+        self.cd.start()
+
+    def update(self):
+        if self.alive: super().draw()
+        if self.cd.check(): 
+            self.kill()

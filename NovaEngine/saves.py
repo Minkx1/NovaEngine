@@ -73,6 +73,7 @@ class SaveManager:
             vars (list[str]): A list of attribute paths (e.g. ["player.hp", "player.money"])
         """
         self.vars = vars
+        return self
 
     def save(self) -> dict:
         """
@@ -145,3 +146,13 @@ class SaveManager:
                 setattr(obj, parts[-1], values[key])
 
         return values
+    
+    def get_value(self, var:str):
+        if not os.path.exists(self.data_file):
+            return None
+        with open(self.data_file, "r", encoding="utf-8") as f:
+            values = json.load(f)
+
+        if var not in values: return None
+            
+        return values.get(var, None)

@@ -196,7 +196,7 @@ class Sprite:
                 
 
     # ====== ANIMATIONS ======
-    def set_animation(self, name, frames, speed=0.1, loop=True):
+    def set_animation(self, name: str, frames: list, speed=0.1, loop=True):
         """
         Register a new animation for the sprite.
         """
@@ -287,6 +287,7 @@ class Group:
 
     def update(self):
         for sprite in self.sprites:
+            sprite.draw()
             sprite.update()
             if not sprite.alive:
                 self.remove(sprite)

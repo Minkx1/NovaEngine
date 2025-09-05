@@ -14,7 +14,7 @@ pygame.init()
 # ========================
 # ENGINE CONSTANTS
 # ========================
-ENGINE_VERSION = "V1.7.0"
+ENGINE_VERSION = "V1.8.0"
 APP_NAME_ENGINE_TEMPLATE = f" | Running with NovaEngine {ENGINE_VERSION}"
 
 
@@ -78,6 +78,7 @@ class DevTools:
             - Antivirus may give false positives.
             - Best used inside a clean venv.
         """
+
         flags = ["pyinstaller", f"--name={name}"]
 
         if onefile:
@@ -217,6 +218,7 @@ class NovaEngine:
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.time = 0
+        self.in_game_time = 0
         self.time_spent_frozed = 0
         self.time_froze = False
 
@@ -259,7 +261,7 @@ class NovaEngine:
     # MAIN LOOP
     # ========================
 
-    def run(self, first_scene=None):
+    def run(self, first_scene=None, save_manager=None):
         """Run the main game loop and optional command input thread."""
         self.globals = get_globals()
 
@@ -293,6 +295,9 @@ class NovaEngine:
                 self.set_active_scene(first_scene)
             except Exception as e:
                 log(f"{e}", error=True)
+        
+        if save_manager is not None: 
+            save_manager.load()
 
         if not self.active_scene and self.scenes:
             self.active_scene = self.scenes[0]
@@ -301,7 +306,8 @@ class NovaEngine:
         while self.running:
             self.keys_pressed = pygame.key.get_pressed()
             self.mouse_clicked = self.MouseClicked(first_iter=True)
-            if not self.time_froze : self.time = pygame.time.get_ticks() - self.time_spent_frozed
+            self.time = pygame.time.get_ticks()
+            if not self.time_froze : self.in_game_time = self.time - self.time_spent_frozed
 
             if self.main_run_func:
                 self.main_run_func()
@@ -332,6 +338,9 @@ class NovaEngine:
 
             pygame.display.flip()
             self.dt = self.clock.tick(self.fps) / 1000
+        
+        if save_manager is not None: 
+            save_manager.save()
 
     def quit(self):
         """Stop engine and exit program."""
@@ -430,11 +439,11 @@ class NovaEngine:
 
     def time_freeze(self):
         self.time_froze = True
-        self.previous_time = self.time
+        self.previous_time = self.in_game_time
     
     def time_unfreeze(self):
         self.time_froze = False
-        self.time_spent_frozed = (pygame.time.get_ticks() - self.previous_time)
+        self.time_spent_frozed = (self.time - self.previous_time)
 
     def Timer(self, duration):
         """Decorator to run function after $duration$ seconds."""
@@ -534,3 +543,23 @@ class NovaEngine:
 
         self.screen.blit(text_surf, rect)
         return rect
+
+
+# if __name__ == "__main__":
+#     while True:
+#         cmd = input(">>> ")
+#         if cmd == "kill()":
+#             sys.exit()
+#             break
+#         elif cmd == "restart()":
+#             subprocess.Popen(
+#                 [sys.executable] + sys.argv,
+#                 creationflags=subprocess.CREATE_NEW_CONSOLE,  # new console
+#             )
+#             sys.exit()
+#             break
+#         else:
+#             try:
+#                 exec(cmd)
+#             except Exception as e:
+#                 log(e, error=True)

@@ -30,8 +30,9 @@ class Scene:
     # ========================
     # OBJECT MANAGEMENT
     # ========================
-    def add_sprite(self, sprites_list=[]):
+    def add_sprite(self, *sprites):
         """Add sprites to the scene manually."""
+        sprites_list = list(sprites)
         for obj in sprites_list:
             self.objects.append(obj)
             if getattr(obj, "solid", False):
@@ -85,6 +86,11 @@ class Scene:
         for obj in self.objects:
             try:
                 obj.update()
+                if isinstance(obj, Sprite):
+                    if not obj.alive:
+                        self.objects.remove(obj)
+                        self.solids.remove(obj)
+                    
             except Exception as e:
                 from .engine import log
 
