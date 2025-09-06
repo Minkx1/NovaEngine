@@ -1,4 +1,6 @@
-import pygame, random, NovaEngine as nova
+import pygame
+import random
+import NovaEngine as nova
 
 # ========================================= #
 
@@ -9,11 +11,10 @@ import pygame, random, NovaEngine as nova
 SCREEN_W, SCREEN_H = 900, 650
 GUIPANEL_H = 50
 
-Engine = nova.NovaEngine((SCREEN_W, SCREEN_H), "Kill 'Till Dawn", "assets/icon.png").set_debug(False)
-sounds = nova.SoundManager()
+Engine = nova.NovaEngine((SCREEN_W, SCREEN_H), "Kill 'Till Dawn", "assets/icon.png").set_debug(True)
 saves = nova.SaveManager(Engine, path="ZombieKillerGame", name="data").set_vars(["player.money", "Engine.record_time", "player.max_hp"])
 
-sounds.load_sound("shot", "assets/gun_shot.mp3")
+nova.SoundManager.load_sound("shot", "assets/gun_shot.mp3")
 
 """ # ===== #   ADDITIONAL CLASSES  # ===== # """
 
@@ -37,7 +38,7 @@ class Player(nova.Sprite):
 
         frames = []
         for i in range(20):
-            frames.append(nova.Sprite.CreateImage(f"assets/player/survivor-move_handgun_{i}.png", self.width, self.height))
+            frames.append(nova.Sprite.create_image(f"assets/player/survivor-move_handgun_{i}.png", self.width, self.height))
         self.set_animation(
             name = "walk",
             frames=frames,
@@ -81,10 +82,10 @@ class Player(nova.Sprite):
             self.projectiles.add(p)
             self.magazine -= 1
 
-            sounds.play_sound("shot", 0.25)
+            nova.SoundManager.play_sound("shot", 0.25)
     
     def reload(self):
-        @self.engine.Timer(1)
+        @nova.Time.Timer(1)
         def _():
             self.magazine = self.max_magazine
     
@@ -119,7 +120,7 @@ class Zombie(nova.Sprite):
 
         frames = []
         for i in range(16):
-            frames.append(nova.Sprite.CreateImage(f"assets/zombie/skeleton-move_{i}.png", self.width, self.height))
+            frames.append(nova.Sprite.create_image(f"assets/zombie/skeleton-move_{i}.png", self.width, self.height))
         self.set_animation(
             name = "walk",
             frames=frames,
@@ -155,7 +156,7 @@ class Zombie(nova.Sprite):
 # ================================= #
 
 # Main Scene
-Main = nova.Scene(Engine)
+Main = nova.Scene()
 with Main.sprites():
     Engine.record_time = 0
 
@@ -165,7 +166,7 @@ with Main.sprites():
     player = Player(Engine, "assets/player.png", 120, 120).place_centered(SCREEN_W / 2, SCREEN_H / 2)
 
     zombies = nova.Group()
-    zombie_cd = Engine.create_cooldown(2)
+    zombie_cd = nova.Time.Cooldown(2)
     def zombie_spawn():
         side = random.choice(["left", "right", "bottom"])
 
@@ -198,21 +199,22 @@ with Main.sprites():
 
 @Main.function()    
 def _():
-    Engine.fill_background(color=nova.Colors.WHITE)
+    nova.Utils.fill_background(color=nova.Colors.WHITE)
+    Engine.record_time = max(Engine.in_game_time, Engine.record_time)
 
-    if Engine.KeyPressed(pygame.K_ESCAPE): Engine.set_active_scene(Pause)
+    if Engine.KeyPressed(pygame.K_ESCAPE): nova.Scene.set_active_scene(Pause)
     if zombie_cd.check():
         zombie_spawn()
         zombie_cd.start()
     
     if not player.player_alive:
         player.kill()
-        Engine.set_active_scene(Death)
+        nova.Scene.set_active_scene(Death)
 
     Main.update() 
 
 # Pause Scene
-Pause = nova.Scene(Engine)
+Pause = nova.Scene()
 with Pause.sprites():
     txt1 = nova.TextLabel(Engine, SCREEN_W/2, 150, "G A M E       P A U S E D",size=32, color=nova.Colors.WHITE, center=True)
     resume_btn = nova.Button(Engine, "assets/Buttons/Resume_Button.png", 300, 100).place_centered(SCREEN_W/2, 250)
@@ -220,19 +222,19 @@ with Pause.sprites():
 
 @Pause.function()
 def _():
-    Engine.time_freeze()
-    Engine.fill_background(nova.Colors.BLACK)
+    nova.Time.time_freeze()
+    nova.Utils.fill_background(nova.Colors.BLACK)
     
     if resume_btn.check():
-        Engine.time_unfreeze()
-        Engine.set_active_scene(Main)
+        nova.Time.time_unfreeze()
+        nova.Scene.set_active_scene(Main)
     if menu_btn.check():
-        Engine.set_active_scene(Menu)
+        nova.Scene.set_active_scene(Menu)
 
     Pause.update()
 
 # Death Scene
-Death = nova.Scene(Engine)
+Death = nova.Scene()
 with Death.sprites():
     death_bg = nova.Rect(Engine, rect=(0,0,SCREEN_W,SCREEN_H))
 
@@ -253,16 +255,16 @@ with Death.sprites():
 
 @Death.function()
 def _():
-    Engine.time_freeze()
+    nova.Time.time_freeze()
 
     if menu_button.check():
         player.respawn()
-        Engine.set_active_scene(Menu)
+        nova.Scene.set_active_scene(Menu)
 
     Death.update()
 
 # Options Scene
-Options = nova.Scene(Engine)
+Options = nova.Scene()
 with Options.sprites():
     opts_bg = nova.Sprite(Engine, "assets/menu_bg.png", SCREEN_W, SCREEN_H)
     record_text = nova.TextLabel(Engine, SCREEN_W/2, 75, "There is nothing to see here. GO AND KILL ZOMBIES!!!", size=32, color=nova.Colors.WHITE, center=True)
@@ -275,7 +277,7 @@ def _():
     Options.update()
 
 # Menu Scene
-Menu = nova.Scene(Engine)
+Menu = nova.Scene()
 with Menu.sprites():
     menu_bg_img = nova.Sprite(Engine, "assets/menu_bg.png", SCREEN_W, SCREEN_H)
 
@@ -292,19 +294,19 @@ with Menu.sprites():
 
 @Menu.function()
 def _():
-    Engine.time_freeze()
+    nova.Time.time_freeze()
     
-    if play_btn.check(): 
-        Engine.set_active_scene(Main)
-        Engine.time_unfreeze()
+    if play_btn.check():
+        nova.Scene.set_active_scene(Main)
+        nova.Time.time_unfreeze()
     if options_btn.check():
-        Engine.set_active_scene(Options)
-    if shop_btn.check(): Engine.set_active_scene(Shop)
+        nova.Scene.set_active_scene(Options)
+    if shop_btn.check(): nova.Scene.set_active_scene(Shop)
     if quit_btn.check(): Engine.quit()
 
     Menu.update()
 
-Shop = nova.Scene(Engine)
+Shop = nova.Scene()
 with Shop.sprites():
     shop_bg = nova.Rect(Engine, rect=(0,0,SCREEN_W, SCREEN_H))
     money_txt = nova.TextLabel(Engine, SCREEN_W/2, 25, "Money: $", size=32, color=nova.Colors.WHITE, center=True).bind("player.money")
@@ -316,7 +318,7 @@ with Shop.sprites():
 
 @Shop.function()
 def _():
-    Engine.time_freeze()
+    nova.Time.time_freeze()
 
     if Engine.KeyPressed(pygame.K_ESCAPE): Engine.set_active_scene(Menu)
     if hp_up.check():
@@ -331,24 +333,10 @@ def _():
     Shop.update()
 
 
-# ===================================================== #
-
+''' #===============================================# '''
+"""                                                   """
 """ # ===== #   MAIN FUNCTION AND GAME RUN  # ===== # """
-
-# ===================================================== #
-
-
-@Engine.main()
-def main():
-    Engine.run_active_scene()
-    Engine.record_time = max(Engine.in_game_time, Engine.record_time)
+"""                                                   """
+''' #===============================================# '''
 
 Engine.run(first_scene=Menu, save_manager=saves)
-
-# nova.DevTools.build_archive(
-#     name="ZombieKiller",
-#     icon_path="assets/icon.ico",
-#     noconsole=True,
-#     sprite_dir="assets",
-#     archive_name="ZombieKiller_V1_0_0_alpha.zip"
-# )

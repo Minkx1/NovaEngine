@@ -105,7 +105,8 @@ class TextLabel(Sprite):
         return self
 
     def draw(self):
-        self.engine.render_text(
+        from .utils import Utils
+        Utils.render_text(
             self.render_text,
             self.x,
             self.y,
@@ -184,7 +185,8 @@ class TextInput(Sprite):
             self.surface, self.bg_color, (self.x, self.y, self.width, self.height)
         )
         # текст
-        text_rect = self.engine.render_text(
+        from .utils import Utils
+        text_rect = Utils.render_text(
             self.current_input,
             self.x + 5,
             self.y + self.height // 2,
@@ -239,7 +241,9 @@ class CheckBox(Sprite):
                 (self.x, self.y + self.height),
                 2,
             )
-        self.engine.render_text(
+            
+        from .utils import Utils
+        Utils.render_text(
             self.text, self.x + 30, self.y, self.font, self.size, self.color
         )
 

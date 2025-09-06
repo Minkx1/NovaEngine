@@ -73,7 +73,8 @@ class ProgressBar(Sprite):
                 )
 
             # text
-            self.engine.render_text(
+            from .utils import Utils
+            Utils.render_text(
                 f"{self.value} / {self.max_value}",
                 self.rect.centerx,
                 self.rect.centery,
@@ -132,12 +133,14 @@ class Rect(Sprite):
     def update(self):
         pygame.draw.rect(self.engine.screen, self.color, self.rect, self.border)
 
+
 class Popup(TextLabel):
     def __init__(self, engine, x, y, text="", time=3, font="TimesNewRoman", size=16, color=(0,0,0), center=True):
         super().__init__(engine, x, y, text, font, size, color, center)
+        from .time import Time
 
         self.time = time
-        self.cd = self.engine.create_cooldown(self.time)
+        self.cd = Time.Cooldown(self.time)
         self.cd.start()
 
     def update(self):

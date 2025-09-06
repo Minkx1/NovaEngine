@@ -2,7 +2,7 @@
 
 from contextlib import contextmanager
 from .sprite import Sprite, Group
-
+from .engine import NovaEngine
 
 class Scene:
     """
@@ -12,14 +12,16 @@ class Scene:
     - Provides context manager for automatic sprite registration.
     """
 
-    def __init__(self, engine):
+    active_scene = None
+
+    def __init__(self):
         """
         Initialize a new scene.
 
         Args:
             engine: NovaEngine instance
         """
-        self.engine = engine
+        self.engine = NovaEngine.Engine
         self.objects = []  # all sprites in scene
         self.solids = []  # only solid sprites
         self.run = self.update  # main update function
@@ -37,6 +39,21 @@ class Scene:
             self.objects.append(obj)
             if getattr(obj, "solid", False):
                 self.solids.append(obj)
+    
+    @staticmethod
+    def set_active_scene(scene):
+        """Set active scene without running it immediately."""
+        Scene.active_scene = scene
+        NovaEngine.Engine.active_scene = scene
+    
+    @staticmethod
+    def run_active_scene():
+        if Scene.active_scene is not None:
+            try:
+                Scene.active_scene.run()
+            except Exception as e:
+                from .dev_tools import log
+                log(msg=e, sender="SceneManager", error=True)
 
     @contextmanager
     def sprites(self):

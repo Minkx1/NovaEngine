@@ -2,50 +2,56 @@
 
 import pygame
 
+pygame.mixer.init()
 
 class SoundManager:
-    def __init__(self):
-        pygame.mixer.init()
-        self.sounds = {}
-        self.music_playing = False
+    sounds = {}
+    music_playing = False
 
-    def load_sound(self, name, path):
+    @staticmethod
+    def load_sound(name, path):
         """Load sounds and give it a name"""
-        self.sounds[name] = pygame.mixer.Sound(path)
+        SoundManager.sounds[name] = pygame.mixer.Sound(path)
 
-    def play_sound(self, name, volume=1.0, count=1):
+    @staticmethod
+    def play_sound(name, volume=1.0, count=1):
         """Play short sound"""
-        if name in self.sounds:
-            snd = self.sounds[name]
+        if name in SoundManager.sounds:
+            snd = SoundManager.sounds[name]
             snd.set_volume(volume)
             snd.play(count-1)
         else:
-            from .engine import log
+            from .dev_tools import log
 
             log(f"Sound '{name}' not found", "SoundManager", True)
 
-    def play_music(self, path, volume=1.0, loop=-1):
+    @staticmethod
+    def play_music(path, volume=1.0, loop=-1):
         """Play music in background"""
         pygame.mixer.music.load(path)
         pygame.mixer.music.set_volume(volume)
         pygame.mixer.music.play(loop)
-        self.music_playing = True
+        SoundManager.music_playing = True
 
-    def stop_music(self):
+    @staticmethod
+    def stop_music():
         """Stops music, that is currently playing"""
         pygame.mixer.music.stop()
-        self.music_playing = False
+        SoundManager.music_playing = False
 
-    def pause_music(self):
+    @staticmethod
+    def pause_music():
         """Pauses music"""
         pygame.mixer.music.pause()
 
-    def continue_music(self):
+    @staticmethod
+    def continue_music():
         """Continues playing music"""
         pygame.mixer.music.unpause()
 
-    def stop_all(self):
+    @staticmethod
+    def stop_all():
         """Stops all playing sounds"""
         pygame.mixer.stop()
         pygame.mixer.music.stop()
-        self.music_playing = False
+        SoundManager.music_playing = False
