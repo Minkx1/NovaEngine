@@ -7,7 +7,7 @@ from .dev_tools import log, get_globals
 # ========================
 # ENGINE CONSTANTS
 # ========================
-ENGINE_VERSION = "V1.9.0"
+ENGINE_VERSION = "V1.9.1"
 APP_NAME_ENGINE_TEMPLATE = f" | Running with NovaEngine {ENGINE_VERSION}"
 
 

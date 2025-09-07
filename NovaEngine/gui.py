@@ -5,8 +5,8 @@ from .sprite import Sprite
 
 
 class Button(Sprite):
-    def __init__(self, engine, img_path, width=None, height=None):
-        super().__init__(engine, img_path, width=width, height=height)
+    def __init__(self, img_path, width=None, height=None):
+        super().__init__(img_path, width=width, height=height)
 
     def check(self):
         """Draw button and return True if it was just pressed."""
@@ -23,9 +23,9 @@ class Button(Sprite):
 
 class ToggleButton(Button):
     def __init__(
-        self, engine, img_path=[str, str], width=None, height=None, start_state=False
+        self, img_path=[str, str], width=None, height=None, start_state=False
     ):
-        super().__init__(engine, img_path, width, height)
+        super().__init__(img_path, width, height)
         self.state = start_state
         self.img_0, self.img_1 = img_path[0], img_path[0]
 
@@ -59,18 +59,14 @@ class ToggleButton(Button):
 class TextLabel(Sprite):
     def __init__(
         self,
-        engine,
-        x,
-        y,
         text="",
         font="TimesNewRoman",
         size=16,
         color=(0, 0, 0),
         center=False,
     ):
-        super().__init__(engine, None)
-        self.x = x
-        self.y = y
+        super().__init__(None)
+        self.x, self.y = (0, 0)
         self.text = text
         self.render_text = self.text
         self.font = font
@@ -144,9 +140,6 @@ class TextInput(Sprite):
 
     def __init__(
         self,
-        engine,
-        x,
-        y,
         width=200,
         height=30,
         font="TimesNewRoman",
@@ -154,9 +147,8 @@ class TextInput(Sprite):
         color=(0, 0, 0),
         bg_color=(255, 255, 255),
     ):
-        super().__init__(engine, None, width, height)
-        self.x = x
-        self.y = y
+        super().__init__(None, width, height)
+        self.x, self.y = (0, 0)
         self.font = font
         self.size = size
         self.color = color
@@ -203,9 +195,6 @@ class TextInput(Sprite):
 class CheckBox(Sprite):
     def __init__(
         self,
-        engine,
-        x,
-        y,
         width=20,
         height=20,
         text="",
@@ -214,9 +203,8 @@ class CheckBox(Sprite):
         color=(0, 0, 0),
         state=False,
     ):
-        super().__init__(engine, None, width, height)
-        self.x, self.y = x, y
-        self.rect.x, self.rect.y = x, y
+        super().__init__(None, width, height)
+        self.x, self.y = (0, 0)
         self.text = text
         self.font, self.size, self.color = font, size, color
         self.state = state

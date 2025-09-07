@@ -4,7 +4,8 @@
 
 # NovaEngine
 
-**Версія:** 1.9.0
+**Версія:** 1.9.1
+
 **Автор:** Minkx1
 
 **Призначення:** Легкий Python-фреймворк на базі PyGame для швидкої розробки 2D-ігор із системою сцен, спрайтів, анімацій, звуком, сейвами та інструментами розробника.
@@ -69,12 +70,12 @@ import NovaEngine as nova
 import NovaEngine as nova
 
 Engine = nova.NovaEngine(window_size=(900, 600))
-Scene1 = nova.Scene(Engine)
+Scene1 = nova.Scene()
 
 with Scene1.sprites():
-    text = nova.TextLabel(Engine, 450, 300, "Hello NovaEngine!", size=40, center=True)
+    text = nova.TextLabel("Hello NovaEngine!", size=40, center=True).place_centred(450, 300)
 
-Engine.run(Scene1)
+Engine.run()
 ```
 
 ### Варіант з `@main`
@@ -187,10 +188,11 @@ def spawn_enemy():
 ## Менеджер збережень
 
 ```python
-from NovaEngine import SaveManager
+from NovaEngine import NovaEngine, SaveManager 
+
+app = NovaEngine() # IMPORTANT : all NovaEngine instances MUST be initialised AFTER main engine is initialized
 
 saves = nova.SaveManager(
-    Engine, # NovaEngine Object
     appdata=True,
     path="ZombieKillerGame", # In what folder the game-files will be saved
     name="data" # Name of file with data
@@ -210,7 +212,7 @@ saves.set_vars(["player.money", "Engine.record_time", "player.max_hp"])
 ```python
 from NovaEngine import SoundManager
 
-sound = SoundManager()
+sound = SoundManager # class with static methods, NOT object
 sound.load_sound("shot", "assets/shot.wav")
 sound.play_sound("shot", volume=0.5)
 
@@ -262,7 +264,7 @@ Menu = nova.Scene()
 Main = nova.Scene()
 
 with Main.sprites():
-    player = nova.Sprite(Engine, "assets/player.png", 100, 100)
+    player = nova.Sprite("assets/player.png", 100, 100)
     player.place_centered(450, 300)
 
     @player.set_update()
@@ -273,7 +275,7 @@ with Main.sprites():
             player.move_angle(50)
 
 with Menu.sprites():
-    title = nova.TextLabel(Engine, 450, 250, "MENU", size=32, center=True)
+    title = nova.TextLabel("MENU", size=32, center=True).place_centred(450, 250)
 
 @Menu.function()
 def _():

@@ -17,10 +17,8 @@ class Scene:
     def __init__(self):
         """
         Initialize a new scene.
-
-        Args:
-            engine: NovaEngine instance
         """
+        
         self.engine = NovaEngine.Engine
         self.objects = []  # all sprites in scene
         self.solids = []  # only solid sprites

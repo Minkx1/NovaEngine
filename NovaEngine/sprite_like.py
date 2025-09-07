@@ -7,7 +7,6 @@ from .gui import TextLabel
 class ProgressBar(Sprite):
     def __init__(
         self,
-        engine,
         width,
         height,
         max_value=100,
@@ -19,7 +18,6 @@ class ProgressBar(Sprite):
     ):
         """
         Клас прогрес-бара
-        :param engine: посилання на движок
         :param x, y: позиція
         :param width, height: розміри
         :param max_value: максимальне значення
@@ -29,7 +27,7 @@ class ProgressBar(Sprite):
         :param border_color: колір рамки
         :param border_width: товщина рамки
         """
-        super().__init__(engine, None, width, height)
+        super().__init__(None, width, height)
 
         self.max_value = max_value
         self.value = start_value
@@ -85,7 +83,6 @@ class ProgressBar(Sprite):
 class Projectile(Sprite):
     def __init__(
         self,
-        engine,
         img_path,
         width=None,
         height=None,
@@ -93,7 +90,7 @@ class Projectile(Sprite):
         target=None,
         speed: int = 100,
     ):
-        super().__init__(engine, img_path, width, height)
+        super().__init__(img_path, width, height)
         self.start = start
         self.target = target
         self.speed = speed
@@ -117,14 +114,14 @@ class Projectile(Sprite):
 
 
 class Dummy(Sprite):
-    def __init__(self, engine):
-        super().__init__(engine, img_path=None, width=0, height=0, solid=False)
+    def __init__(self):
+        super().__init__(img_path=None, width=0, height=0, solid=False)
 
 
 class Rect(Sprite):
 
-    def __init__(self, engine, color=(0,0,0), border=0, rect=(0,0,0,0), solid = False):
-        super().__init__(engine, None, width=0, height=0, solid=solid)
+    def __init__(self, color=(0,0,0), border=0, rect=(0,0,0,0), solid = False):
+        super().__init__(None, width=0, height=0, solid=solid)
 
         self.color = color
         self.border = border
@@ -135,8 +132,8 @@ class Rect(Sprite):
 
 
 class Popup(TextLabel):
-    def __init__(self, engine, x, y, text="", time=3, font="TimesNewRoman", size=16, color=(0,0,0), center=True):
-        super().__init__(engine, x, y, text, font, size, color, center)
+    def __init__(self, text="", time=3, font="TimesNewRoman", size=16, color=(0,0,0), center=True):
+        super().__init__(text, font, size, color, center)
         from .time import Time
 
         self.time = time

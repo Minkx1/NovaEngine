@@ -28,7 +28,6 @@ class Sprite:
 
     def __init__(
         self,
-        engine,
         img_path: str,
         width: float | None = None,
         height: float | None = None,
@@ -38,14 +37,15 @@ class Sprite:
         Initialize a new Sprite.
 
         Args:
-            engine: The game engine instance providing screen and dt.
             img_path (str): Path to image file.
             width (float | None): Optional width for scaling.
             height (float | None): Optional height for scaling.
             solid (bool): Whether sprite is solid (collidable).
         """
-        self.engine = engine
-        self.surface = engine.screen
+        from .engine import NovaEngine
+
+        self.engine = NovaEngine.Engine
+        self.surface = self.engine.screen
         self.solid = solid
         self.alive = True
 
@@ -56,7 +56,7 @@ class Sprite:
             random.randint(0, 255),
             random.randint(0, 255),
         )
-        self.debug = engine.debug
+        self.debug = self.engine.debug
 
         Sprite._counter += 1
         self.count = Sprite._counter

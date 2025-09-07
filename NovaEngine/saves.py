@@ -9,18 +9,17 @@ class SaveManager:
     A manager class for saving and loading object attributes to JSON.
 
     Example usage:
-        save_manager = SaveManager(engine)
+        save_manager = SaveManager()
         save_manager.set_vars(["player.hp", "player.money"])
         save_manager.save()
         save_manager.load()
     """
 
-    def __init__(self, engine, appdata: bool = True, path:str = None, name:str = "data"):
+    def __init__(self, appdata: bool = True, path:str = None, name:str = "data"):
         """
         Initialize SaveManager.
 
         Args:
-            engine: Reference to the game engine (used for app_name).
             appdata (bool): If True, saves data in OS-specific appdata folder.
                             If False, saves in current working directory.
             path (str): If $appdata$ is False, SaveManager will create folder with saves in $path$ directory. 
@@ -28,7 +27,9 @@ class SaveManager:
             name (str): the name of save file.
 
         """
-        self.engine = engine
+        from .engine import NovaEngine
+
+        self.engine = NovaEngine.Engine
         self.path = path
         self.name = name
 
