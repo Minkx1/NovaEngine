@@ -247,7 +247,7 @@ class Sprite:
         Returns:
             Sprite: Returns self for chaining.
         """
-        self.angle = (self.angle + angle) % 360
+        self.angle = (self.angle - angle) % 360
         return self
 
     def look_at(self, target):
@@ -392,7 +392,6 @@ class Sprite:
         if width and height:
             img = pygame.transform.scale(img, (width, height))
         return img
-
 
 class Group:
     """

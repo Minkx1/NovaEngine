@@ -93,20 +93,26 @@ class SaveManager:
 
         for key in self.vars:
             parts = key.split(".")
-            obj = g.get(parts[0])
-            if obj is None:
-                continue
-
-            # Traverse object attributes
-            for attr in parts[1:]:
-                obj = getattr(obj, attr, None)
+            if len(parts) == 1:
+                # просто змінна у глобалах
+                if parts[0] in g:
+                    values[key] = g[parts[0]]
+            else:
+                obj = g.get(parts[0])
                 if obj is None:
-                    break
-            if obj is not None:
-                values[key] = obj
+                    continue
+                for attr in parts[1:]:
+                    obj = getattr(obj, attr, None)
+                    if obj is None:
+                        break
+                if obj is not None:
+                    values[key] = obj
 
-        with open(self.data_file, "w", encoding="utf-8") as f:
-            json.dump(values, f, indent=4)
+        json_str = json.dumps(values)
+        hex_str = json_str.encode("utf-8").hex()
+
+        with open(self.data_file, "w") as f:
+            f.write(hex_str)
 
         return values
 
@@ -124,8 +130,15 @@ class SaveManager:
         if not os.path.exists(self.data_file):
             return {}
 
-        with open(self.data_file, "r", encoding="utf-8") as f:
-            values = json.load(f)
+        with open(self.data_file, "r") as f:
+            hex_str = f.read().strip()
+
+        try:
+            json_str = bytes.fromhex(hex_str).decode("utf-8")
+            values = json.loads(json_str)
+        except Exception as e:
+            print("Помилка завантаження:", e)
+            return
 
         g = self._get_globals()
         for key in self.vars:
@@ -133,18 +146,19 @@ class SaveManager:
                 continue
 
             parts = key.split(".")
-            obj = g.get(parts[0])
-            if obj is None:
-                continue
-
-            # Traverse until the second-to-last attribute
-            for attr in parts[1:-1]:
-                obj = getattr(obj, attr, None)
+            if len(parts) == 1:
+                # просто змінна
+                g[parts[0]] = values[key]
+            else:
+                obj = g.get(parts[0])
                 if obj is None:
-                    break
-
-            if obj is not None:
-                setattr(obj, parts[-1], values[key])
+                    continue
+                for attr in parts[1:-1]:
+                    obj = getattr(obj, attr, None)
+                    if obj is None:
+                        break
+                if obj is not None:
+                    setattr(obj, parts[-1], values[key])
 
         return values
     

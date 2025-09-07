@@ -10,6 +10,7 @@ from .dev_tools import log, get_globals
 ENGINE_VERSION = "V1.9.1"
 APP_NAME_ENGINE_TEMPLATE = f" | Running with NovaEngine {ENGINE_VERSION}"
 
+ALLOW_NO_TEMPLATE = True
 
 # ========================
 # MAIN INSTANCE CLASS
@@ -40,7 +41,8 @@ class NovaEngine:
         self.icon_path = icon_path
 
         self.screen = pygame.display.set_mode(window_size)
-        pygame.display.set_caption(self.app_name + APP_NAME_ENGINE_TEMPLATE)
+        if not ALLOW_NO_TEMPLATE: pygame.display.set_caption(self.app_name + APP_NAME_ENGINE_TEMPLATE)
+        else: pygame.display.set_caption(self.app_name)
 
         if self.icon_path:
             pygame.display.set_icon(pygame.image.load(icon_path).convert_alpha())
