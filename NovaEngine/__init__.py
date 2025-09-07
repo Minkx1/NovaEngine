@@ -1,3 +1,6 @@
+import sys
+sys.modules['NovaEngine'] = sys.modules[__name__]
+
 from .engine import NovaEngine
 from .time import Time
 from .utils import Colors, Utils

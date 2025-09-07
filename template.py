@@ -1,4 +1,4 @@
-import pygame, NovaEngine as nova
+import pygame, novaengine as nova
 
 SCREEN_W, SCREEN_H = 900, 600
 

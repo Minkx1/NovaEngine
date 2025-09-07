@@ -1,5 +1,5 @@
 import pygame as pg
-import NovaEngine as nova
+import novaengine as nova
 
 class window:
     def __init__(self, x, y):
