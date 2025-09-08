@@ -1,7 +1,7 @@
 import sys
 sys.modules['NovaEngine'] = sys.modules[__name__]
 
-from .engine import NovaEngine
+from .core import NovaEngine
 from .time import Time
 from .utils import Colors, Utils
 from .dev_tools import DevTools, log, get_globals

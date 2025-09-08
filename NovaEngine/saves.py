@@ -27,7 +27,7 @@ class SaveManager:
             name (str): the name of save file.
 
         """
-        from .engine import NovaEngine
+        from .core import NovaEngine
 
         self.engine = NovaEngine.Engine
         self.path = path

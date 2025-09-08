@@ -17,12 +17,8 @@ ALLOW_NO_TEMPLATE = True
 # ========================
 class NovaEngine:
     """
-    Lightweight PyGame framework for:
-    - game loop, system inputs
-    - input handling
-    - scenes
-    - timers & threads
-    - text rendering
+    Lightweight PyGame framework for Main Game Interation.
+    Handles and runs active scene, checks for pressed keys and mouse buttons.
     """
 
     Engine = None
@@ -250,3 +246,16 @@ class NovaEngine:
             return bool(self.keys_pressed[key])
         except (IndexError, TypeError):
             return False
+
+    def set_active_scene(self, scene):
+        """Set active scene without running it immediately."""
+        self.active_scene = scene
+        NovaEngine.Engine.active_scene = scene
+    
+    def run_active_scene(self):
+        if self.active_scene is not None:
+            try:
+                self.active_scene.run()
+            except Exception as e:
+                from .dev_tools import log
+                log(msg=e, sender="SceneManager", error=True)

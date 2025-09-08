@@ -2,7 +2,7 @@
 
 import pygame
 from typing import Tuple, Union
-from .engine import NovaEngine
+from .core import NovaEngine
 
 class Colors:
     """Predefined RGB colors."""

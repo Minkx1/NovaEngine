@@ -84,7 +84,7 @@ class TextLabel(Sprite):
         self.text = new_text
 
     def bind(self, var: str):
-        from .engine import get_globals
+        from .core import get_globals
 
         GLOBALS = get_globals()
 

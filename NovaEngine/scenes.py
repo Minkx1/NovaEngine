@@ -2,7 +2,7 @@
 
 from contextlib import contextmanager
 from .sprite import Sprite, Group
-from .engine import NovaEngine
+from .core import NovaEngine
 
 class Scene:
     """
@@ -11,8 +11,6 @@ class Scene:
     - Manages solid objects for collision detection.
     - Provides context manager for automatic sprite registration.
     """
-
-    active_scene = None
 
     def __init__(self):
         """
@@ -37,21 +35,6 @@ class Scene:
             self.objects.append(obj)
             if getattr(obj, "solid", False):
                 self.solids.append(obj)
-    
-    @staticmethod
-    def set_active_scene(scene):
-        """Set active scene without running it immediately."""
-        Scene.active_scene = scene
-        NovaEngine.Engine.active_scene = scene
-    
-    @staticmethod
-    def run_active_scene():
-        if Scene.active_scene is not None:
-            try:
-                Scene.active_scene.run()
-            except Exception as e:
-                from .dev_tools import log
-                log(msg=e, sender="SceneManager", error=True)
 
     @contextmanager
     def sprites(self):
@@ -107,6 +90,6 @@ class Scene:
                         self.solids.remove(obj)
                     
             except Exception as e:
-                from .engine import log
+                from .core import log
 
                 log(e, "SceneManager", True)

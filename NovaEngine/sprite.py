@@ -42,7 +42,7 @@ class Sprite:
             height (float | None): Optional height for scaling.
             solid (bool): Whether sprite is solid (collidable).
         """
-        from .engine import NovaEngine
+        from .core import NovaEngine
 
         self.engine = NovaEngine.Engine
         self.surface = self.engine.screen

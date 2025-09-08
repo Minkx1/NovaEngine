@@ -3,6 +3,7 @@ build/
 dist/
 releases/
 .vscode/
+.venv/
 tempCodeRunnerFile.py
 main.cpp
 main.exe

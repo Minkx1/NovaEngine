@@ -1,7 +1,7 @@
 """===== time.py ====="""
 
 import threading
-from .engine import NovaEngine
+from .core import NovaEngine
 
 class Time:
     @staticmethod
