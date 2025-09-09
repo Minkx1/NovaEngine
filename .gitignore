@@ -4,6 +4,7 @@ dist/
 releases/
 .vscode/
 .venv/
+*.zip
 tempCodeRunnerFile.py
 main.cpp
 main.exe

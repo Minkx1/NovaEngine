@@ -10,7 +10,7 @@ from .dev_tools import log, get_globals
 ENGINE_VERSION = "V1.9.1"
 APP_NAME_ENGINE_TEMPLATE = f" | Running with NovaEngine {ENGINE_VERSION}"
 
-ALLOW_NO_TEMPLATE = True
+ALLOW_NO_TEMPLATE = False
 
 # ========================
 # MAIN INSTANCE CLASS

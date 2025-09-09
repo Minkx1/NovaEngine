@@ -95,9 +95,8 @@ class Sprite:
             Sprite: Returns self for chaining.
         """
         if self.alive:
-            rotated_img = pygame.transform.rotate(self.img, self.angle)
-            rotated_rect = rotated_img.get_rect(center=self.rect.center)
-            self.surface.blit(rotated_img, rotated_rect.topleft)
+            rot_data = self._rotate_img()
+            self.surface.blit(rot_data.get("img", self.img), rot_data.get("rect", self.rect).topleft)
 
         if self.debug:
             from .utils import Utils
@@ -110,6 +109,27 @@ class Sprite:
                 center=True,
             )
         return self
+
+    def _rotate_img(self):
+        rotated_img = pygame.transform.rotate(self.img, self.angle)
+        rotated_rect = rotated_img.get_rect(center=self.rect.center)
+
+        return {"img": rotated_img, "rect": rotated_rect}
+
+    def hover(self, special_point: tuple[float, float] = None):
+        """
+        If sprite's rect is hovered by mouse, returns True.
+        Else, returns False.
+        """
+        val = self.rect.collidepoint(pygame.mouse.get_pos())
+        if special_point:
+            try: 
+                val = self.rect.collidepoint(special_point)
+            except Exception as e:
+                from .dev_tools import log
+                log(e, "SpriteHover", True)
+
+        return val
 
     def set_update(self):
         """
