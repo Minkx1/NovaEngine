@@ -247,6 +247,10 @@ class NovaEngine:
         except (IndexError, TypeError):
             return False
 
+    # ========================
+    # SCENES MANAGEMENT
+    # ========================
+
     def set_active_scene(self, scene):
         """Set active scene without running it immediately."""
         self.active_scene = scene
@@ -259,3 +263,6 @@ class NovaEngine:
             except Exception as e:
                 from .dev_tools import log
                 log(msg=e, sender="SceneManager", error=True)
+    
+    def get_scene(self):
+        return self.active_scene

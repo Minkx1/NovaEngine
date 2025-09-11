@@ -10,7 +10,6 @@ import math
 import random
 import pygame
 
-
 class Sprite:
     """
     A helper class for working with sprites.
@@ -43,6 +42,7 @@ class Sprite:
             solid (bool): Whether sprite is solid (collidable).
         """
         from .core import NovaEngine
+        from .time import Time
 
         self.engine = NovaEngine.Engine
         self.surface = self.engine.screen
@@ -77,6 +77,9 @@ class Sprite:
         self.width = self.original_img.get_width()
         self.height = self.original_img.get_height()
 
+        self.collide_immun_time = 0.1
+        self.collide_immun = Time.Cooldown(self.collide_immun_time)
+
         # Current image (may be transformed)
         self.img = self.original_img
         self.angle: float = 0
@@ -86,6 +89,11 @@ class Sprite:
         # Animations
         self.animations: dict[str, dict] = {}
         self.current_animation: str | None = None
+
+    def set_collide_immunity(self, duration):
+        from .time import Time
+        self.collide_immun_time = duration
+        self.collide_immun = Time.Cooldown(self.collide_immun_time)
 
     def draw(self):
         """
@@ -296,10 +304,29 @@ class Sprite:
         Returns:
             bool: True if collision detected, else False.
         """
-        if other and other.alive:
-            return self.rect.colliderect(other.rect)
-        if rect:
-            return self.rect.colliderect(rect)
+        if self.collide_immun.check():
+            self.collide_immun.start()
+            if other and other.alive:
+                return self.rect.colliderect(other.rect)
+            if rect:
+                return self.rect.colliderect(rect)                
+        return False
+
+    def collide_any(self, solids=False):
+        """
+        If Sprite's rect collides with any other sprite's rect in the scene : returns True 
+        """
+        if self.collide_immun.check():
+            self.collide_immun.start()
+            scene = self.engine.get_scene()      
+            objs = scene.objects
+            if solids:
+                objs = scene.solids
+
+            for sp in objs:
+                if sp != self:
+                    if self.rect.colliderect(sp.rect):
+                        return True
         return False
 
     def rect_update(self):

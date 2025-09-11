@@ -4,6 +4,8 @@ import pygame
 from .sprite import Sprite
 from .gui import TextLabel
 
+__all__ = ["ProgressBar", "Projectile", "Dummy", "Rect", "Popup"]
+
 class ProgressBar(Sprite):
     def __init__(
         self,
